@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { parseWords, parseSentences } from '../../lib/parse';
+import { extractText } from '../../files/extract';
 
 export default function AddDeckPage() {
   const navigate = useNavigate();
@@ -10,6 +11,9 @@ export default function AddDeckPage() {
   const [wordsText, setWordsText] = useState('');
   const [sentencesText, setSentencesText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [target, setTarget] = useState<'words' | 'sentences'>('words');
+  const [fileError, setFileError] = useState('');
+  const [extracting, setExtracting] = useState(false);
 
   const parsedWords = useMemo(() => parseWords(wordsText), [wordsText]);
   const parsedSentences = useMemo(() => parseSentences(sentencesText), [sentencesText]);
@@ -21,9 +25,44 @@ export default function AddDeckPage() {
     navigate('/');
   }
 
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileError('');
+    setExtracting(true);
+    try {
+      const text = await extractText(file);
+      if (target === 'words') setWordsText((prev) => (prev ? prev + '\n' : '') + text);
+      else setSentencesText((prev) => (prev ? prev + '\n' : '') + text);
+    } catch (err) {
+      setFileError(err instanceof Error ? err.message : '추출 실패');
+    } finally {
+      setExtracting(false);
+      e.target.value = '';
+    }
+  }
+
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold">자료 추가</h1>
+
+      <div className="rounded-lg border p-3 space-y-2 bg-gray-50">
+        <p className="text-sm font-medium">파일에서 텍스트 가져오기</p>
+        <div className="flex gap-3 text-sm">
+          <label className="flex items-center gap-1">
+            <input type="radio" name="target" checked={target === 'words'} onChange={() => setTarget('words')} />
+            단어칸으로
+          </label>
+          <label className="flex items-center gap-1">
+            <input type="radio" name="target" checked={target === 'sentences'} onChange={() => setTarget('sentences')} />
+            문장칸으로
+          </label>
+        </div>
+        <input type="file" accept=".txt,.docx,.pdf,image/*" onChange={onFile} disabled={extracting} />
+        {extracting && <p className="text-xs text-gray-500">추출 중… (이미지·PDF는 시간이 걸릴 수 있어요)</p>}
+        {fileError && <p className="text-xs text-red-500">{fileError}</p>}
+        <p className="text-xs text-gray-400">추출한 뒤 아래에서 형식(영단어 = 뜻)에 맞게 정리하세요.</p>
+      </div>
 
       <label className="block">
         <span className="text-sm text-gray-600">자료 이름</span>
