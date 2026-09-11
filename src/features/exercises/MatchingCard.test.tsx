@@ -25,8 +25,18 @@ describe('MatchingCard', () => {
     await user.click(screen.getByRole('button', { name: '안건' }));
     await user.click(screen.getByRole('button', { name: 'schedule' }));
     await user.click(screen.getByRole('button', { name: '일정' }));
-    expect(useStore.getState().recordWord).toHaveBeenCalledWith('1', true);
-    expect(useStore.getState().recordWord).toHaveBeenCalledWith('2', true);
     await waitFor(() => expect(onDone).toHaveBeenCalledWith(true));
+  });
+
+  it('is a pure warm-up: does not record reviews (words are recorded by their own exercises)', async () => {
+    const user = userEvent.setup();
+    const onDone = vi.fn();
+    render(<MatchingCard ex={ex} onDone={onDone} />);
+    await user.click(screen.getByRole('button', { name: 'agenda' }));
+    await user.click(screen.getByRole('button', { name: '안건' }));
+    await user.click(screen.getByRole('button', { name: 'schedule' }));
+    await user.click(screen.getByRole('button', { name: '일정' }));
+    await waitFor(() => expect(onDone).toHaveBeenCalledWith(true));
+    expect(useStore.getState().recordWord).not.toHaveBeenCalled();
   });
 });

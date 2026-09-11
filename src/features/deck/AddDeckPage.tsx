@@ -14,6 +14,7 @@ export default function AddDeckPage() {
   const [target, setTarget] = useState<'words' | 'sentences'>('words');
   const [fileError, setFileError] = useState('');
   const [extracting, setExtracting] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const parsedWords = useMemo(() => parseWords(wordsText), [wordsText]);
   const parsedSentences = useMemo(() => parseSentences(sentencesText), [sentencesText]);
@@ -21,8 +22,14 @@ export default function AddDeckPage() {
 
   async function onSave() {
     setSaving(true);
-    await createDeck(name.trim(), parsedWords, parsedSentences);
-    navigate('/');
+    setSaveError('');
+    try {
+      await createDeck(name.trim(), parsedWords, parsedSentences);
+      navigate('/');
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : '저장에 실패했어요. 다시 시도해 주세요.');
+      setSaving(false);
+    }
   }
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -98,6 +105,8 @@ export default function AddDeckPage() {
         />
         <span className="text-xs text-gray-400">문장 {parsedSentences.length}개 인식됨</span>
       </label>
+
+      {saveError && <p className="text-sm text-red-500">{saveError}</p>}
 
       <div className="flex gap-2">
         <button

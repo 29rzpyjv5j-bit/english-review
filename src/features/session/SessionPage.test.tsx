@@ -35,4 +35,24 @@ describe('SessionPage', () => {
     expect(screen.getByText(/학습 완료/)).toBeInTheDocument();
     expect(complete).toHaveBeenCalled();
   });
+
+  it('resets card state between consecutive same-kind cards (no leaked selection)', async () => {
+    const user = userEvent.setup();
+    render(<MemoryRouter><SessionPage /></MemoryRouter>);
+
+    // 첫 mcq 카드: 아직 선택 전이라 '다음' 버튼이 없어야 한다.
+    expect(screen.queryByText('다음')).toBeNull();
+
+    // 아무 선택지나 고르면 '다음' 버튼이 나타난다.
+    const firstCardButtons = screen.getAllByRole('button');
+    await user.click(firstCardButtons[0]);
+    expect(screen.getByText('다음')).toBeInTheDocument();
+
+    // 다음 카드로 이동한다.
+    await user.click(screen.getByText('다음'));
+
+    // 두 번째 카드는 새 인스턴스여야 한다: 선택 전이므로 '다음'이 다시 없어야 한다.
+    // (key 없이 인스턴스가 재사용되면 이전 카드의 선택 상태가 새어나와 실패한다.)
+    expect(screen.queryByText('다음')).toBeNull();
+  });
 });

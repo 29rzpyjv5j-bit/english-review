@@ -70,11 +70,11 @@ export default function SessionPage() {
   return (
     <div className="max-w-md mx-auto p-4 space-y-6">
       <ProgressBar value={index} max={exercises.length} />
-      {ex.kind === 'matching' && <MatchingCard ex={ex} onDone={(c) => handleDone(ex, c)} />}
-      {ex.kind === 'mcq' && <McqCard ex={ex} onDone={(c) => handleDone(ex, c)} />}
-      {ex.kind === 'speakWord' && <SpeakWordCard ex={ex} onDone={(c) => handleDone(ex, c)} />}
-      {ex.kind === 'repeatSentence' && <RepeatSentenceCard ex={ex} onDone={(c) => handleDone(ex, c)} />}
-      {ex.kind === 'dictation' && <DictationCard ex={ex} onDone={(c) => handleDone(ex, c)} />}
+      {ex.kind === 'matching' && <MatchingCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+      {ex.kind === 'mcq' && <McqCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+      {ex.kind === 'speakWord' && <SpeakWordCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+      {ex.kind === 'repeatSentence' && <RepeatSentenceCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+      {ex.kind === 'dictation' && <DictationCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
     </div>
   );
 }
