@@ -3,6 +3,7 @@ import type { Exercise } from '../session/buildSession';
 import { speak } from '../../speech/tts';
 import { listen, sttSupported } from '../../speech/stt';
 import { isCloseEnough } from '../../lib/grading';
+import { Speaker, Mic } from '../../components/icons';
 
 export default function SpeakWordCard({
   ex, onDone,
@@ -27,26 +28,31 @@ export default function SpeakWordCard({
   }
 
   return (
-    <div className="space-y-4 text-center">
-      <p className="text-sm text-gray-500">이 단어를 소리 내어 말하세요</p>
-      <p className="text-3xl font-bold">{ex.english}</p>
-      <p className="text-gray-500">{ex.meaning}</p>
-      <button className="rounded-full border px-4 py-2" onClick={() => speak(ex.english)}>🔊 발음 듣기</button>
+    <div className="space-y-5 text-center">
+      <p className="text-sm text-muted">이 단어를 소리 내어 말하세요</p>
+      <p className="text-4xl font-bold">{ex.english}</p>
+      <p className="text-muted">{ex.meaning}</p>
+      <button
+        className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm active:opacity-90"
+        onClick={() => speak(ex.english)}
+      >
+        <Speaker className="w-4 h-4" /> 발음 듣기
+      </button>
       {result === null ? (
         <button
-          className="w-full rounded-xl bg-green-500 text-white py-3 font-bold"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-accent text-accentInk py-3 font-bold disabled:opacity-60"
           onClick={record}
           disabled={status === 'listening'}
         >
-          {status === 'listening' ? '🎤 듣는 중…' : '🎤 말하기'}
+          <Mic className="w-5 h-5" /> {status === 'listening' ? '듣는 중…' : '말하기'}
         </button>
       ) : (
         <div className="space-y-2">
-          <p className="text-sm text-gray-500">인식: {heard || '(없음)'}</p>
-          <p className={result ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>
+          <p className="text-sm text-muted">인식: {heard || '(없음)'}</p>
+          <p className={result ? 'text-accent font-bold' : 'text-danger font-bold'}>
             {result ? '좋아요! 🎉' : '다시 연습해요'}
           </p>
-          <button className="w-full rounded-xl border py-2" onClick={() => onDone(result)}>다음</button>
+          <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(result)}>다음</button>
         </div>
       )}
     </div>

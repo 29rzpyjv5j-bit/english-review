@@ -48,26 +48,26 @@ export default function MatchingCard({
   }
 
   function cls(token: Token) {
-    if (matched.has(token.id)) return 'opacity-30';
-    if (selected?.id === token.id && selected.side === token.side) return 'bg-blue-100 border-blue-400';
-    if (wrongPair === token.id) return 'bg-red-100 border-red-400';
-    return '';
+    if (matched.has(token.id)) return 'opacity-30 border-line bg-surface';
+    if (selected?.id === token.id && selected.side === token.side) return 'border-accent bg-accent/15 text-accent';
+    if (wrongPair === token.id) return 'border-danger bg-danger/15 text-danger';
+    return 'border-line bg-surface';
   }
 
   return (
     <div>
-      <p className="text-sm text-gray-500 mb-3">같은 뜻끼리 연결하세요</p>
+      <p className="text-sm text-muted mb-3">같은 뜻끼리 연결하세요</p>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           {left.map((t) => (
-            <button key={`en-${t.id}`} className={`block w-full rounded-xl border py-3 ${cls(t)}`} onClick={() => pick(t)}>
+            <button key={`en-${t.id}`} className={`block w-full rounded-xl border py-3 font-medium ${cls(t)}`} onClick={() => pick(t)}>
               {t.label}
             </button>
           ))}
         </div>
         <div className="space-y-2">
           {right.map((t) => (
-            <button key={`ko-${t.id}`} className={`block w-full rounded-xl border py-3 ${cls(t)}`} onClick={() => pick(t)}>
+            <button key={`ko-${t.id}`} className={`block w-full rounded-xl border py-3 font-medium ${cls(t)}`} onClick={() => pick(t)}>
               {t.label}
             </button>
           ))}

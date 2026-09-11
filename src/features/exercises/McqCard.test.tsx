@@ -10,7 +10,7 @@ describe('McqCard', () => {
     const user = userEvent.setup();
     const onDone = vi.fn();
     render(<McqCard ex={ex} onDone={onDone} />);
-    await user.click(screen.getByRole('button', { name: '안건' }));
+    await user.click(screen.getByRole('button', { name: /안건/ }));
     expect(onDone).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: '다음' }));
     expect(onDone).toHaveBeenCalledWith(true);
@@ -20,7 +20,7 @@ describe('McqCard', () => {
     const user = userEvent.setup();
     const onDone = vi.fn();
     render(<McqCard ex={ex} onDone={onDone} />);
-    await user.click(screen.getByRole('button', { name: '일정' }));
+    await user.click(screen.getByRole('button', { name: /일정/ }));
     expect(onDone).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: '다음' }));
     expect(onDone).toHaveBeenCalledWith(false);

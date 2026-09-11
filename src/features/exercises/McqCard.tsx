@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { Exercise } from '../session/buildSession';
 
+const LETTERS = ['A', 'B', 'C', 'D'];
+
 export default function McqCard({
   ex, onDone,
 }: { ex: Extract<Exercise, { kind: 'mcq' }>; onDone: (c: boolean) => void }) {
@@ -13,26 +15,43 @@ export default function McqCard({
 
   return (
     <div>
-      <p className="text-sm text-gray-500 mb-1">{ex.direction === 'en2ko' ? '뜻을 고르세요' : '영단어를 고르세요'}</p>
-      <p className="text-2xl font-bold mb-4">{ex.prompt}</p>
-      <div className="space-y-2">
-        {ex.choices.map((c) => {
-          const state = !picked ? '' : c === ex.answer ? 'bg-green-100 border-green-400'
-            : c === picked ? 'bg-red-100 border-red-400' : '';
+      <p className="text-sm text-muted mb-1">{ex.direction === 'en2ko' ? '뜻을 고르세요' : '영단어를 고르세요'}</p>
+      <p className="text-3xl font-bold mb-5">{ex.prompt}</p>
+      <div className="grid grid-cols-2 gap-3">
+        {ex.choices.map((c, i) => {
+          const isAnswer = c === ex.answer;
+          const isPicked = c === picked;
+          const state = !picked
+            ? 'border-line bg-surface'
+            : isAnswer
+              ? 'border-accent bg-accent/15 text-accent'
+              : isPicked
+                ? 'border-danger bg-danger/15 text-danger'
+                : 'border-line bg-surface opacity-60';
+          const badge = !picked
+            ? 'border-line text-muted'
+            : isAnswer
+              ? 'border-accent text-accent'
+              : isPicked
+                ? 'border-danger text-danger'
+                : 'border-line text-muted';
           return (
             <button
               key={c}
-              className={`block w-full rounded-xl border py-3 ${state}`}
+              className={`flex items-center gap-2 rounded-xl border px-3 py-4 text-left ${state}`}
               onClick={() => choose(c)}
             >
-              {c}
+              <span className={`grid place-items-center w-6 h-6 rounded-md border text-xs font-bold ${badge}`}>
+                {LETTERS[i] ?? '•'}
+              </span>
+              <span className="font-medium">{c}</span>
             </button>
           );
         })}
       </div>
       {picked && (
         <button
-          className="mt-4 w-full rounded-xl bg-blue-500 text-white py-3"
+          className="mt-5 w-full rounded-xl bg-accent text-accentInk py-3 font-bold active:opacity-90"
           onClick={() => onDone(picked === ex.answer)}
         >
           다음
