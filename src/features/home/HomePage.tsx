@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import StatusBar from '../../components/StatusBar';
-import { Flame, Chevron, Mic, MicOff } from '../../components/icons';
+import { Flame, Chevron, Mic, MicOff, Check } from '../../components/icons';
 import { exportData, importData, type BackupData } from '../../db/backup';
 
 function Ring({ frac }: { frac: number }) {
@@ -52,7 +52,7 @@ export default function HomePage() {
   const hasWrongItems = wrongItemsToday.size > 0;
   const fileRef = useRef<HTMLInputElement>(null);
   const [backupMsg, setBackupMsg] = useState('');
-  const [decksOpen, setDecksOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   async function onExport() {
     const data = await exportData();
@@ -136,18 +136,17 @@ export default function HomePage() {
         </span>
       </button>
 
-      <div>
-        <button
-          onClick={() => setDecksOpen((o) => !o)}
-          aria-expanded={decksOpen}
-          className="w-full flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-left active:opacity-90"
-        >
-          <span className="text-sm font-medium">내 자료</span>
-          <span className="text-xs text-muted tabular-nums">{decks.length}개</span>
-          <Chevron className={`w-4 h-4 ml-auto text-muted transition-transform ${decksOpen ? 'rotate-90' : ''}`} />
-        </button>
-        {decksOpen && (
-          <ul className="space-y-2 mt-2">
+      {settingsOpen ? (
+        <div className="space-y-4">
+          <button
+            onClick={() => setSettingsOpen(false)}
+            className="w-full flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-left active:opacity-90"
+          >
+            <span className="text-sm font-medium">내 자료</span>
+            <span className="text-xs text-muted tabular-nums">{decks.length}개</span>
+            <Chevron className="w-4 h-4 ml-auto text-muted rotate-90" />
+          </button>
+          <ul className="space-y-2">
             {decks.length === 0 && <li className="text-muted text-sm px-1">아직 자료가 없어요.</li>}
             {decks.map((d) => {
               const c = countFor(d.id);
@@ -159,30 +158,44 @@ export default function HomePage() {
               );
             })}
           </ul>
-        )}
-      </div>
 
-      <Link
-        to="/add"
-        className="block text-center rounded-xl border border-dashed border-line py-3 text-sm text-muted active:opacity-90"
-      >
-        + 자료 추가
-      </Link>
+          <Link
+            to="/add"
+            className="block text-center rounded-xl border border-dashed border-line py-3 text-sm text-muted active:opacity-90"
+          >
+            + 자료 추가
+          </Link>
 
-      <div className="pt-1">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-muted mb-2">백업 · 기기 옮기기</h2>
-        <div className="flex gap-2">
-          <button onClick={onExport} className="flex-1 rounded-xl border border-line bg-surface py-2.5 text-sm active:opacity-90">
-            내보내기
-          </button>
-          <button onClick={() => fileRef.current?.click()} className="flex-1 rounded-xl border border-line bg-surface py-2.5 text-sm active:opacity-90">
-            가져오기
-          </button>
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted">백업 · 기기 옮기기</h3>
+            <div className="flex gap-2">
+              <button onClick={onExport} className="flex-1 rounded-xl border border-line bg-surface py-2.5 text-sm active:opacity-90">
+                내보내기
+              </button>
+              <button onClick={() => fileRef.current?.click()} className="flex-1 rounded-xl border border-line bg-surface py-2.5 text-sm active:opacity-90">
+                가져오기
+              </button>
+            </div>
+            <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={onImportFile} />
+            {backupMsg && <p className="text-xs text-accent">{backupMsg}</p>}
+            <p className="text-xs text-muted">다른 기기에서 쓰려면: 여기서 내보내기 → 그 기기에서 가져오기.</p>
+          </div>
         </div>
-        <input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={onImportFile} />
-        {backupMsg && <p className="text-xs text-accent mt-2">{backupMsg}</p>}
-        <p className="text-xs text-muted mt-1">다른 기기에서 쓰려면: 여기서 내보내기 → 그 기기에서 가져오기.</p>
-      </div>
+      ) : (
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="w-full flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-left active:opacity-90"
+        >
+          <span className="grid place-items-center w-7 h-7 rounded-full bg-surface2 text-muted">
+            <Check className="w-4 h-4" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-medium">설정</span>
+            <span className="block text-xs text-muted">자료 관리 · 백업</span>
+          </span>
+          <Chevron className="w-4 h-4 ml-auto text-muted" />
+        </button>
+      )}
     </div>
   );
 }
