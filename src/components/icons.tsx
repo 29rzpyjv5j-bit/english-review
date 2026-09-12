@@ -119,19 +119,24 @@ export function MicOff({ className }: IconProps) {
 export function Settings({ className }: IconProps) {
   return (
     <Svg className={className}>
-      <g>
-        {/* 톱니 8개 */}
-        <rect x="10.5" y="1" width="3" height="3" rx="0.5" />
-        <rect x="18.5" y="5.5" width="3" height="3" rx="0.5" transform="rotate(45 20 7)" />
-        <rect x="19.5" y="10.5" width="3" height="3" rx="0.5" />
-        <rect x="18.5" y="15.5" width="3" height="3" rx="0.5" transform="rotate(-45 20 17)" />
-        <rect x="10.5" y="20" width="3" height="3" rx="0.5" />
-        <rect x="2.5" y="15.5" width="3" height="3" rx="0.5" transform="rotate(45 4 17)" />
-        <rect x="1.5" y="10.5" width="3" height="3" rx="0.5" />
-        <rect x="2.5" y="5.5" width="3" height="3" rx="0.5" transform="rotate(-45 4 7)" />
-        {/* 중심 원 */}
-        <circle cx="12" cy="12" r="4" />
-      </g>
+      {/* 위 톱니 */}
+      <rect x="11" y="2" width="2" height="2.5" rx="0.4" />
+      {/* 우상향 톱니 */}
+      <rect x="17" y="5" width="2" height="2.5" rx="0.4" transform="rotate(45 18 6.25)" />
+      {/* 우측 톱니 */}
+      <rect x="19.5" y="11" width="2.5" height="2" rx="0.4" />
+      {/* 우하향 톱니 */}
+      <rect x="17" y="17" width="2" height="2.5" rx="0.4" transform="rotate(45 18 18.25)" />
+      {/* 아래 톱니 */}
+      <rect x="11" y="19.5" width="2" height="2.5" rx="0.4" />
+      {/* 좌하향 톱니 */}
+      <rect x="5" y="17" width="2" height="2.5" rx="0.4" transform="rotate(45 6 18.25)" />
+      {/* 좌측 톱니 */}
+      <rect x="2" y="11" width="2.5" height="2" rx="0.4" />
+      {/* 좌상향 톱니 */}
+      <rect x="5" y="5" width="2" height="2.5" rx="0.4" transform="rotate(45 6 6.25)" />
+      {/* 중심 원 */}
+      <circle cx="12" cy="12" r="3.5" fill="currentColor" />
     </Svg>
   );
 }
