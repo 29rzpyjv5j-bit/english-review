@@ -6,6 +6,12 @@ import { extractText } from '../../files/extract';
 import { getApiKey, setApiKey } from '../../ai/apiKey';
 import { organizeMaterial } from '../../ai/organize';
 
+interface CsvRow {
+  deck: string;
+  english: string;
+  korean: string;
+}
+
 // AI 정리 결과(ParsedItems)를 입력칸 텍스트 형식으로 되돌린다(사용자가 검토·수정 가능).
 function wordsToText(words: ParsedWord[]): string {
   return words.map((w) => `${w.english} = ${w.meaning}`).join('\n');
@@ -36,6 +42,10 @@ export default function AddDeckPage() {
   const [apiKey, setApiKeyState] = useState(getApiKey());
   const [keyDraft, setKeyDraft] = useState('');
   const [editingKey, setEditingKey] = useState(false);
+
+  // CSV 가져오기
+  const [csvLoading, setCsvLoading] = useState(false);
+  const [csvError, setCsvError] = useState('');
 
   const parsedWords = useMemo(() => parseWords(wordsText), [wordsText]);
   const parsedSentences = useMemo(() => parseSentences(sentencesText), [sentencesText]);
@@ -109,12 +119,112 @@ export default function AddDeckPage() {
     }
   }
 
+  async function parseCsvLine(line: string): Promise<string[]> {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  }
+
+  async function onCsvFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvError('');
+    setCsvLoading(true);
+    try {
+      const text = await file.text();
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) throw new Error('CSV 파일이 비어있습니다.');
+
+      const headerParts = await parseCsvLine(lines[0]);
+      const header = headerParts.map(h => h.toLowerCase());
+
+      let isWordFormat = false;
+      let isSentenceFormat = false;
+
+      if (header[0] === 'deck' && header[1] === 'english' && header[2] === 'korean') {
+        isWordFormat = true;
+      } else if (header[0] === 'deck' && header[1] === 'text' && header[2] === 'translation') {
+        isSentenceFormat = true;
+      } else {
+        throw new Error('CSV 형식이 잘못되었습니다. deck, english, korean 또는 deck, text, translation 순서여야 합니다.');
+      }
+
+      // 덱별로 그룹화
+      const deckGroups: { [key: string]: { words: ParsedWord[]; sentences: ParsedSentence[] } } = {};
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const parts = await parseCsvLine(line);
+        if (parts.length < 3) continue;
+
+        const deckName = parts[0];
+        if (!deckGroups[deckName]) deckGroups[deckName] = { words: [], sentences: [] };
+
+        if (isWordFormat) {
+          deckGroups[deckName].words.push({ english: parts[1], meaning: parts[2] });
+        } else if (isSentenceFormat) {
+          deckGroups[deckName].sentences.push({ text: parts[1], translation: parts[2] });
+        }
+      }
+
+      if (Object.keys(deckGroups).length === 0) throw new Error('유효한 데이터가 없습니다.');
+
+      // 각 덱 생성
+      for (const [deckName, data] of Object.entries(deckGroups)) {
+        await createDeck(deckName, data.words, data.sentences);
+      }
+
+      setCsvError(`${Object.keys(deckGroups).length}개 자료 추가 완료! 홈으로 돌아갑니다…`);
+      setTimeout(() => navigate('/'), 1500);
+    } catch (err) {
+      setCsvError(err instanceof Error ? err.message : 'CSV 파일을 처리할 수 없습니다.');
+    } finally {
+      setCsvLoading(false);
+      e.target.value = '';
+    }
+  }
+
   const fieldCls =
     'mt-1 w-full rounded-xl border border-line bg-surface p-3 text-ink placeholder:text-muted focus:outline-none focus:border-accent';
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold">자료 추가</h1>
+
+      <div className="rounded-xl border border-accent/40 p-3 space-y-2 bg-accent/5">
+        <p className="text-sm font-medium text-accent">📥 CSV 파일 가져오기 (여러 자료 한 번에)</p>
+        <p className="text-xs text-muted">deck, english, korean 형식의 CSV 파일을 업로드하면 자동으로 여러 자료가 추가됩니다.</p>
+        <input
+          type="file"
+          accept=".csv"
+          onChange={onCsvFile}
+          disabled={csvLoading}
+          className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-accent file:text-accentInk file:px-3 file:py-1.5 file:font-medium"
+        />
+        {csvLoading && <p className="text-xs text-muted">처리 중…</p>}
+        {csvError && <p className={`text-xs ${csvError.includes('완료') ? 'text-accent' : 'text-danger'}`}>{csvError}</p>}
+        <p className="text-xs text-muted">예: CLO 1, I don't like confrontation, 대면하는 것을 좋아하지 않습니다</p>
+      </div>
 
       <div className="rounded-xl border border-line p-3 space-y-2 bg-surface">
         <p className="text-sm font-medium">📋 한 번에 붙여넣기</p>
