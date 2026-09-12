@@ -43,3 +43,17 @@ export function parseSentences(text: string): ParsedSentence[] {
 export function parseInput(wordsText: string, sentencesText: string): ParsedItems {
   return { words: parseWords(wordsText), sentences: parseSentences(sentencesText) };
 }
+
+// 한 번에 붙여넣은 텍스트를 단어칸/문장칸 텍스트로 나눈다.
+// '=' 가 있는 줄 → 단어, 나머지 줄 → 문장.
+export function splitCombined(text: string): { wordsText: string; sentencesText: string } {
+  const wordLines: string[] = [];
+  const sentenceLines: string[] = [];
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.includes('=')) wordLines.push(line);
+    else sentenceLines.push(line);
+  }
+  return { wordsText: wordLines.join('\n'), sentencesText: sentenceLines.join('\n') };
+}

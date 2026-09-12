@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
-import { parseWords, parseSentences, type ParsedWord, type ParsedSentence } from '../../lib/parse';
+import { parseWords, parseSentences, splitCombined, type ParsedWord, type ParsedSentence } from '../../lib/parse';
 import { extractText } from '../../files/extract';
 import { getApiKey, setApiKey } from '../../ai/apiKey';
 import { organizeMaterial } from '../../ai/organize';
@@ -25,6 +25,9 @@ export default function AddDeckPage() {
   const [fileError, setFileError] = useState('');
   const [extracting, setExtracting] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  // 한 번에 붙여넣기 (AI 불필요)
+  const [combinedText, setCombinedText] = useState('');
 
   // AI 자동 정리
   const [rawText, setRawText] = useState('');
@@ -67,6 +70,14 @@ export default function AddDeckPage() {
     }
   }
 
+  function applyCombined() {
+    const { wordsText: w, sentencesText: s } = splitCombined(combinedText);
+    if (!w && !s) return;
+    setWordsText((prev) => [prev, w].filter(Boolean).join('\n'));
+    setSentencesText((prev) => [prev, s].filter(Boolean).join('\n'));
+    setCombinedText('');
+  }
+
   function saveKey() {
     const k = keyDraft.trim();
     setApiKey(k);
@@ -105,8 +116,27 @@ export default function AddDeckPage() {
     <div className="max-w-md mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold">자료 추가</h1>
 
+      <div className="rounded-xl border border-line p-3 space-y-2 bg-surface">
+        <p className="text-sm font-medium">📋 한 번에 붙여넣기</p>
+        <p className="text-xs text-muted">단어·문장 구분 없이 통째로 붙여넣으세요. <span className="text-ink">=</span> 가 있는 줄은 단어칸, 나머지는 문장칸으로 자동 분류돼요.</p>
+        <textarea
+          aria-label="한 번에 붙여넣기"
+          className="w-full rounded-xl border border-line bg-bg p-3 h-28 text-sm text-ink placeholder:text-muted focus:outline-none focus:border-accent"
+          value={combinedText}
+          onChange={(e) => setCombinedText(e.target.value)}
+          placeholder={'agenda = 안건\nschedule = 일정\nCould you send me the agenda?'}
+        />
+        <button
+          className="w-full rounded-xl bg-accent text-accentInk py-2.5 font-bold disabled:opacity-50"
+          disabled={!combinedText.trim()}
+          onClick={applyCombined}
+        >
+          칸에 나눠 담기
+        </button>
+      </div>
+
       <div className="rounded-xl border border-accent/40 p-3 space-y-2 bg-accent/5">
-        <p className="text-sm font-medium text-accent">✨ AI로 정리 (Claude)</p>
+        <p className="text-sm font-medium text-accent">✨ AI로 정리 (Claude · 선택, API 키 필요)</p>
         <p className="text-xs text-muted">수업 자료 원문을 그대로 붙여넣으면 AI가 단어·문장으로 정리해 아래 칸을 채워줘요.</p>
 
         {apiKey && !editingKey ? (

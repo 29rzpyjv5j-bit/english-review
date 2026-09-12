@@ -1,5 +1,18 @@
 import { describe, it, expect } from 'vitest';
-import { parseWords, parseSentences, parseInput } from './parse';
+import { parseWords, parseSentences, parseInput, splitCombined } from './parse';
+
+describe('splitCombined', () => {
+  it('routes = lines to words and the rest to sentences', () => {
+    const r = splitCombined('agenda = 안건\nCould you send it?\nschedule = 일정\nSee you.');
+    expect(r.wordsText).toBe('agenda = 안건\nschedule = 일정');
+    expect(r.sentencesText).toBe('Could you send it?\nSee you.');
+  });
+  it('ignores blank lines', () => {
+    const r = splitCombined('  \nmeeting = 회의\n\n');
+    expect(r.wordsText).toBe('meeting = 회의');
+    expect(r.sentencesText).toBe('');
+  });
+});
 
 describe('parseWords', () => {
   it('splits english and meaning by =', () => {
