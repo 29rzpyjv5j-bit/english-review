@@ -23,6 +23,8 @@ interface State {
   clearWrongItemsToday: () => void;
   load: () => Promise<void>;
   createDeck: (name: string, words: ParsedWord[], sentences: ParsedSentence[]) => Promise<void>;
+  /** CSV 일괄 가져오기용. 같은 이름의 자료가 있으면 새로 만들지 않고 거기에 더한다. */
+  importIntoDeck: (name: string, words: ParsedWord[], sentences: ParsedSentence[]) => Promise<void>;
   recordWord: (id: string, correct: boolean) => Promise<void>;
   recordSentence: (id: string, correct: boolean) => Promise<void>;
   completeSession: (correct: number, total: number) => Promise<{ gained: number }>;
@@ -68,6 +70,20 @@ export const useStore = create<State>((set, get) => ({
     const newSentences = await db.addSentences(deck.id, sentences);
     set((s) => ({
       decks: [...s.decks, deck],
+      words: [...s.words, ...newWords],
+      sentences: [...s.sentences, ...newSentences],
+    }));
+  },
+
+  async importIntoDeck(name, words, sentences) {
+    const existing = get().decks.find((d) => d.name === name);
+    if (!existing) {
+      await get().createDeck(name, words, sentences);
+      return;
+    }
+    const newWords = await db.addWords(existing.id, words);
+    const newSentences = await db.addSentences(existing.id, sentences);
+    set((s) => ({
       words: [...s.words, ...newWords],
       sentences: [...s.sentences, ...newSentences],
     }));

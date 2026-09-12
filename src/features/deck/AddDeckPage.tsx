@@ -6,10 +6,29 @@ import { extractText } from '../../files/extract';
 import { getApiKey, setApiKey } from '../../ai/apiKey';
 import { organizeMaterial } from '../../ai/organize';
 
-interface CsvRow {
-  deck: string;
-  english: string;
-  korean: string;
+// 따옴표로 감싼 칸 안의 쉼표는 구분자가 아니다("" 는 따옴표 한 개).
+function parseCsvLine(line: string): string[] {
+  const cells: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      cells.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  cells.push(current.trim());
+  return cells;
 }
 
 // AI 정리 결과(ParsedItems)를 입력칸 텍스트 형식으로 되돌린다(사용자가 검토·수정 가능).
@@ -23,6 +42,7 @@ function sentencesToText(sentences: ParsedSentence[]): string {
 export default function AddDeckPage() {
   const navigate = useNavigate();
   const createDeck = useStore((s) => s.createDeck);
+  const importIntoDeck = useStore((s) => s.importIntoDeck);
   const [name, setName] = useState('');
   const [wordsText, setWordsText] = useState('');
   const [sentencesText, setSentencesText] = useState('');
@@ -119,31 +139,6 @@ export default function AddDeckPage() {
     }
   }
 
-  async function parseCsvLine(line: string): Promise<string[]> {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        if (inQuotes && line[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === ',' && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-    result.push(current.trim());
-    return result;
-  }
-
   async function onCsvFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -154,7 +149,7 @@ export default function AddDeckPage() {
       const lines = text.trim().split('\n');
       if (lines.length < 2) throw new Error('CSV 파일이 비어있습니다.');
 
-      const headerParts = await parseCsvLine(lines[0]);
+      const headerParts = parseCsvLine(lines[0].trim());
       const header = headerParts.map(h => h.toLowerCase());
 
       let isWordFormat = false;
@@ -174,7 +169,7 @@ export default function AddDeckPage() {
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
-        const parts = await parseCsvLine(line);
+        const parts = parseCsvLine(line);
         if (parts.length < 3) continue;
 
         const deckName = parts[0];
@@ -189,9 +184,8 @@ export default function AddDeckPage() {
 
       if (Object.keys(deckGroups).length === 0) throw new Error('유효한 데이터가 없습니다.');
 
-      // 각 덱 생성
       for (const [deckName, data] of Object.entries(deckGroups)) {
-        await createDeck(deckName, data.words, data.sentences);
+        await importIntoDeck(deckName, data.words, data.sentences);
       }
 
       setCsvError(`${Object.keys(deckGroups).length}개 자료 추가 완료! 홈으로 돌아갑니다…`);
@@ -213,7 +207,7 @@ export default function AddDeckPage() {
 
       <div className="rounded-xl border border-accent/40 p-3 space-y-2 bg-accent/5">
         <p className="text-sm font-medium text-accent">📥 CSV 파일 가져오기 (여러 자료 한 번에)</p>
-        <p className="text-xs text-muted">deck, english, korean 형식의 CSV 파일을 업로드하면 자동으로 여러 자료가 추가됩니다.</p>
+        <p className="text-xs text-muted">단어는 <span className="text-ink">deck, english, korean</span>, 문장은 <span className="text-ink">deck, text, translation</span> 형식이에요. 같은 이름의 자료가 이미 있으면 거기에 더해집니다.</p>
         <input
           type="file"
           accept=".csv"
