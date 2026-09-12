@@ -1,5 +1,5 @@
-import { describe, it, expect, afterEach } from 'vitest';
-import { ttsSupported, speakableText } from './tts';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+import { ttsSupported, speakableText, stopSpeaking } from './tts';
 import { sttSupported } from './stt';
 
 afterEach(() => {
@@ -41,5 +41,18 @@ describe('speakableText', () => {
 
   it('보통 표제어는 그대로 둔다', () => {
     expect(speakableText('get off work')).toBe('get off work');
+  });
+});
+
+describe('stopSpeaking', () => {
+  it('재생 중인 음성을 취소한다', () => {
+    const cancel = vi.fn();
+    (globalThis as any).speechSynthesis = { cancel };
+    stopSpeaking();
+    expect(cancel).toHaveBeenCalled();
+  });
+
+  it('음성 기능이 없는 환경에서도 터지지 않는다', () => {
+    expect(() => stopSpeaking()).not.toThrow();
   });
 });

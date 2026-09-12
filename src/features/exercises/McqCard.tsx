@@ -20,8 +20,9 @@ export default function McqCard({
   function choose(choice: string) {
     if (picked) return;
     setPicked(choice);
-    // 선택 후 해당 보기를 말해주기
-    speak(choice);
+    // 영어인 쪽만 읽어준다. 한국어 뜻을 영어 음성으로 읽으면 엉뚱한 소리가 난다.
+    if (ex.direction === 'ko2en') speak(choice);
+    else speak(ex.prompt);
   }
 
   const isCorrect = picked && picked === ex.answer;

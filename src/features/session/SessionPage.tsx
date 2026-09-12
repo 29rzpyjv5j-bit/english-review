@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { buildSession, type Exercise } from './buildSession';
 import { loadProgress, saveProgress, clearProgress } from './progress';
 import { sttSupported } from '../../speech/stt';
+import { stopSpeaking } from '../../speech/tts';
 import { todayStr } from '../../lib/dateUtils';
 import ProgressBar from '../../components/ProgressBar';
 import ResultScreen from './ResultScreen';
@@ -54,6 +55,10 @@ export default function SessionPage() {
   }, [isReview, words, sentences, wrongItemsToday, restored]);
 
   const [index, setIndex] = useState(restored?.index ?? 0);
+  // 문제를 넘기기 전에 앞 문제의 음성을 끊는다. 카드마다 스스로 읽어주지는 않아서
+  // (보기를 고르는 문제, 짝 맞추기 등) 그대로 두면 앞 문장이 다음 화면에서 계속 들린다.
+  // 이 정리는 다음 카드가 읽기 시작하기 전에 실행된다.
+  useEffect(() => () => stopSpeaking(), [index]);
   const [correctCount, setCorrectCount] = useState(restored?.correctCount ?? 0);
   const [wrongItems, setWrongItems] = useState<{ id: string; text: string }[]>(restored?.wrongItems ?? []);
   const [finished, setFinished] = useState(false);

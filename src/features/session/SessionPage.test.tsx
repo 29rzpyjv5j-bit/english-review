@@ -5,7 +5,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import SessionPage from './SessionPage';
 
-vi.mock('../../speech/tts', () => ({ speak: vi.fn().mockResolvedValue(undefined), ttsSupported: () => true }));
+vi.mock('../../speech/tts', () => ({
+  speak: vi.fn().mockResolvedValue(undefined),
+  ttsSupported: () => true,
+  stopSpeaking: vi.fn(),
+}));
 vi.mock('../../speech/stt', () => ({ listen: vi.fn().mockResolvedValue('test'), sttSupported: () => false }));
 
 beforeEach(() => {
