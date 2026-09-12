@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
@@ -48,11 +48,11 @@ describe('SessionPage', () => {
     await user.click(firstCardButtons[0]);
     expect(screen.getByText('다음')).toBeInTheDocument();
 
-    // 다음 카드로 이동한다.
+    // 다음 카드로 이동한다. 이동은 복습 기록(DB 쓰기)을 await 한 뒤 일어나므로 기다린다.
     await user.click(screen.getByText('다음'));
 
     // 두 번째 카드는 새 인스턴스여야 한다: 선택 전이므로 '다음'이 다시 없어야 한다.
     // (key 없이 인스턴스가 재사용되면 이전 카드의 선택 상태가 새어나와 실패한다.)
-    expect(screen.queryByText('다음')).toBeNull();
+    await waitFor(() => expect(screen.queryByText('다음')).toBeNull());
   });
 });

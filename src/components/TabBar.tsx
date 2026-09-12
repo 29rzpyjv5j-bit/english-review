@@ -10,7 +10,9 @@ const tabs = [
 export default function TabBar() {
   const { pathname } = useLocation();
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+    // 불투명 배경으로 바닥에 붙은 하나의 바처럼 보이게 하고, 아래 여백은 홈 인디케이터
+    // 높이(safe-area)만큼만 남겨 아이콘이 화면 바닥 가까이 오도록 한다.
+    <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-surface pt-1.5 pb-[calc(env(safe-area-inset-bottom)+0.375rem)]">
       <div className="max-w-md mx-auto flex">
         {tabs.map(({ to, label, Icon }) => {
           const active = to === '/' ? pathname === '/' : pathname.startsWith(to);
@@ -18,7 +20,7 @@ export default function TabBar() {
             <Link
               key={to}
               to={to}
-              className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${
+              className={`flex-1 flex flex-col items-center gap-0.5 py-1 text-[11px] font-medium ${
                 active ? 'text-accent' : 'text-muted'
               }`}
             >
