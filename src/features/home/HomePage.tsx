@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import StatusBar from '../../components/StatusBar';
+import LeagueBadge from '../../components/LeagueBadge';
 import { Flame, Chevron, Mic, MicOff, Check } from '../../components/icons';
 import { todayStr } from '../../lib/dateUtils';
+import { getLeagueMilestones } from '../../lib/league';
 
 function Ring({ frac }: { frac: number }) {
   const C = 2 * Math.PI * 15.5;
@@ -48,9 +50,24 @@ export default function HomePage() {
   const wrongItemsToday = useStore((s) => s.wrongItemsToday);
   const hasWrongItems = wrongItemsToday.size > 0;
 
+  const milestone = getLeagueMilestones(streakCount);
+
   return (
     <div className="max-w-md mx-auto p-4 space-y-5">
       <StatusBar />
+
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-muted mb-1">현재 리그</p>
+          <LeagueBadge league={profile.currentLeague} />
+        </div>
+        {milestone && (
+          <div className="text-right">
+            <p className="text-xs text-muted">다음 리그까지</p>
+            <p className="text-sm font-bold text-accent">{milestone.daysUntil}일</p>
+          </div>
+        )}
+      </div>
 
       <Link to="/session" className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-4 active:opacity-90">
         {todayCompleted ? (
