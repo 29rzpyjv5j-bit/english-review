@@ -81,4 +81,25 @@ describe('McqCard', () => {
 
     expect(speak).toHaveBeenCalledWith('schedule');
   });
+
+  it('첫 번째 실수에서는 정답을 드러내지 않는다', async () => {
+    const user = userEvent.setup();
+    render(<McqCard ex={ex} onDone={vi.fn()} />);
+
+    await user.click(screen.getByRole('button', { name: /일정/ }));
+
+    expect(screen.queryByText(/정답은/)).toBeNull();
+    expect(screen.getByRole('button', { name: /안건/ }).className).not.toContain('border-accent');
+  });
+
+  it('기회를 다 쓰면 정답 보기를 드러낸다', async () => {
+    const user = userEvent.setup();
+    render(<McqCard ex={ex} onDone={vi.fn()} />);
+
+    await user.click(screen.getByRole('button', { name: /일정/ }));
+    await user.click(screen.getByRole('button', { name: '다시 선택' }));
+    await user.click(screen.getByRole('button', { name: /회의/ }));
+
+    expect(screen.getByRole('button', { name: /안건/ }).className).toContain('border-accent');
+  });
 });

@@ -45,16 +45,19 @@ export default function McqCard({
         {ex.choices.map((c, i) => {
           const isAnswer = c === ex.answer;
           const isPicked = c === picked;
+          // 다시 풀 기회가 남아 있는 동안에는 정답을 드러내지 않는다. 첫 실수에 바로
+          // 알려주면 두 번째 선택이 학습이 아니라 따라 찍기가 된다.
+          const reveal = isCorrect || retried;
           const state = !picked
             ? 'border-line bg-surface'
-            : isAnswer
+            : isAnswer && reveal
               ? 'border-accent bg-accent/15 text-accent'
               : isPicked
                 ? 'border-danger bg-danger/15 text-danger'
                 : 'border-line bg-surface opacity-60';
           const badge = !picked
             ? 'border-line text-muted'
-            : isAnswer
+            : isAnswer && reveal
               ? 'border-accent text-accent'
               : isPicked
                 ? 'border-danger text-danger'
