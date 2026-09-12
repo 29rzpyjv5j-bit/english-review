@@ -119,7 +119,23 @@ export function MicOff({ className }: IconProps) {
 export function Settings({ className }: IconProps) {
   return (
     <Svg className={className}>
-      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="4.5" />
+      {/* 위 */}
+      <rect x="11" y="1.5" width="2" height="3.5" rx="0.4" />
+      {/* 우상 45도 */}
+      <rect x="17" y="4.5" width="3.5" height="2" rx="0.4" transform="rotate(45 18.75 5.5)" />
+      {/* 우 */}
+      <rect x="19.5" y="11" width="3.5" height="2" rx="0.4" />
+      {/* 우하 45도 */}
+      <rect x="17" y="17.5" width="2" height="3.5" rx="0.4" transform="rotate(45 18 19.25)" />
+      {/* 아래 */}
+      <rect x="11" y="19.5" width="2" height="3.5" rx="0.4" />
+      {/* 좌하 45도 */}
+      <rect x="4.5" y="17.5" width="2" height="3.5" rx="0.4" transform="rotate(45 5.5 19.25)" />
+      {/* 좌 */}
+      <rect x="1.5" y="11" width="3.5" height="2" rx="0.4" />
+      {/* 좌상 45도 */}
+      <rect x="4.5" y="4.5" width="3.5" height="2" rx="0.4" transform="rotate(45 6.25 5.5)" />
     </Svg>
   );
 }

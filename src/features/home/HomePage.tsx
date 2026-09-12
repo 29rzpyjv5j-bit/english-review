@@ -64,16 +64,11 @@ export default function HomePage() {
         )}
         <div className="min-w-0">
           <p className="text-base font-bold">오늘의 학습</p>
-          {todayCompleted ? (
-            <p className="text-sm text-accent">완료했어요 🎉</p>
-          ) : (
-            <p className="text-sm text-muted">
-              {toReward === 0 ? '오늘도 이어가요 🔥' : `다음 보상까지 ${toReward}일`}
-            </p>
-          )}
-          {!todayCompleted && (
-            <p className="mt-1 text-sm font-semibold text-accent">이어서 시작하기 →</p>
-          )}
+          <p className="text-sm text-muted">
+            {todayCompleted ? '완료했어요 🎉 · ' : ''}
+            {toReward === 0 ? '오늘도 이어가요 🔥' : `다음 보상까지 ${toReward}일`}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-accent">이어서 시작하기 →</p>
         </div>
       </Link>
 
