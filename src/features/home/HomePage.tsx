@@ -48,6 +48,8 @@ export default function HomePage() {
   const toReward = streakCount === 0 ? 7 : inCycle === 0 ? 0 : 7 - inCycle;
 
   const load = useStore((s) => s.load);
+  const wrongItemsToday = useStore((s) => s.wrongItemsToday);
+  const hasWrongItems = wrongItemsToday.size > 0;
   const fileRef = useRef<HTMLInputElement>(null);
   const [backupMsg, setBackupMsg] = useState('');
   const [decksOpen, setDecksOpen] = useState(false);
@@ -99,13 +101,18 @@ export default function HomePage() {
       </Link>
 
       <Link
-        to="/session?mode=review"
-        className="flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-muted active:opacity-90"
+        to={hasWrongItems ? '/session?mode=review' : '#'}
+        className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm active:opacity-90 ${
+          hasWrongItems
+            ? 'border-line bg-surface text-muted'
+            : 'border-line bg-surface opacity-60 text-muted cursor-not-allowed'
+        }`}
+        onClick={(e) => !hasWrongItems && e.preventDefault()}
       >
-        <span className="grid place-items-center w-7 h-7 rounded-full bg-accent/15 text-accent">
+        <span className={`grid place-items-center w-7 h-7 rounded-full ${hasWrongItems ? 'bg-accent/15 text-accent' : 'bg-surface2 text-muted'}`}>
           <Flame className="w-4 h-4" />
         </span>
-        틀린 항목 복습하기
+        틀린 항목 복습하기 {hasWrongItems && `(${wrongItemsToday.size})`}
         <Chevron className="w-4 h-4 ml-auto" />
       </Link>
 

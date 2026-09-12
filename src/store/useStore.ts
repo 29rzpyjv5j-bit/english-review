@@ -17,6 +17,10 @@ interface State {
   /** 무음 학습: 말하기 문제 대신 쓰기 문제로 낸다. */
   quiet: boolean;
   setQuiet: (on: boolean) => void;
+  /** 오늘 복습 중 틀린 항목 ID들 (단어 또는 문장) */
+  wrongItemsToday: Set<string>;
+  setWrongItemsToday: (items: Set<string>) => void;
+  clearWrongItemsToday: () => void;
   load: () => Promise<void>;
   createDeck: (name: string, words: ParsedWord[], sentences: ParsedSentence[]) => Promise<void>;
   recordWord: (id: string, correct: boolean) => Promise<void>;
@@ -36,10 +40,19 @@ export const useStore = create<State>((set, get) => ({
   sentences: [],
   profile: EMPTY_PROFILE,
   quiet: getQuietMode(),
+  wrongItemsToday: new Set(),
 
   setQuiet(on) {
     setQuietMode(on);
     set({ quiet: on });
+  },
+
+  setWrongItemsToday(items) {
+    set({ wrongItemsToday: items });
+  },
+
+  clearWrongItemsToday() {
+    set({ wrongItemsToday: new Set() });
   },
 
   async load() {
