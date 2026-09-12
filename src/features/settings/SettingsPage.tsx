@@ -37,7 +37,7 @@ export default function SettingsPage() {
     try {
       const text = await file.text();
       const data = JSON.parse(text) as BackupData;
-      if (window.confirm('현재 자료를 이 백업으로 교체할까요? (기존 덱은 삭제됩니다)')) {
+      if (window.confirm('현재 자료를 이 백업으로 교체할까요? (기존 덱은 삭제되고, 연속·보석은 합쳐집니다)')) {
         await importData(data);
         await load();
         setBackupMsg('가져오기 완료 ✓');
