@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Exercise } from '../session/buildSession';
+import { speak } from '../../speech/tts';
 
 // 짝짓기 카드는 세션 도입부의 워밍업(인지 연습)이다. 여기서는 복습 기록을
 // 하지 않는다 — 같은 단어들은 이어지는 개별 mcq/말하기 카드에서 정확히 한 번만
@@ -25,8 +26,15 @@ export default function MatchingCard({
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [wrongPair, setWrongPair] = useState<string | null>(null);
 
+  // 영단어를 누르면 발음을 들려준다(귀로도 익히도록).
+  function speakEnglish(id: string) {
+    const pair = ex.pairs.find((p) => p.id === id);
+    if (pair) speak(pair.english);
+  }
+
   function pick(token: Token) {
     if (matched.has(token.id)) return;
+    if (token.side === 'en') speakEnglish(token.id);
     if (!selected) {
       setSelected(token);
       return;
@@ -36,6 +44,7 @@ export default function MatchingCard({
       return;
     }
     if (selected.id === token.id) {
+      speakEnglish(token.id);
       const next = new Set(matched).add(token.id);
       setMatched(next);
       setSelected(null);

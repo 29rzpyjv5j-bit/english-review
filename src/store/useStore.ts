@@ -6,6 +6,7 @@ import { applyResult } from '../lib/leitner';
 import { applyStudyDay } from '../lib/streak';
 import { sessionReward, FREEZE_COST, FREEZE_MAX } from '../lib/gems';
 import { todayStr } from '../lib/dateUtils';
+import { getQuietMode, setQuietMode } from '../settings/quiet';
 
 interface State {
   loaded: boolean;
@@ -13,6 +14,9 @@ interface State {
   words: Word[];
   sentences: Sentence[];
   profile: Profile;
+  /** 무음 학습: 말하기 문제 대신 쓰기 문제로 낸다. */
+  quiet: boolean;
+  setQuiet: (on: boolean) => void;
   load: () => Promise<void>;
   createDeck: (name: string, words: ParsedWord[], sentences: ParsedSentence[]) => Promise<void>;
   recordWord: (id: string, correct: boolean) => Promise<void>;
@@ -31,6 +35,12 @@ export const useStore = create<State>((set, get) => ({
   words: [],
   sentences: [],
   profile: EMPTY_PROFILE,
+  quiet: getQuietMode(),
+
+  setQuiet(on) {
+    setQuietMode(on);
+    set({ quiet: on });
+  },
 
   async load() {
     const [decks, words, sentences, profile] = await Promise.all([

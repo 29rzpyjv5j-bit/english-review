@@ -10,6 +10,7 @@ import MatchingCard from '../exercises/MatchingCard';
 import SpeakWordCard from '../exercises/SpeakWordCard';
 import RepeatSentenceCard from '../exercises/RepeatSentenceCard';
 import DictationCard from '../exercises/DictationCard';
+import WriteSentenceCard from '../exercises/WriteSentenceCard';
 
 export default function SessionPage() {
   const words = useStore((s) => s.words);
@@ -17,9 +18,10 @@ export default function SessionPage() {
   const recordWord = useStore((s) => s.recordWord);
   const recordSentence = useStore((s) => s.recordSentence);
   const completeSession = useStore((s) => s.completeSession);
+  const quiet = useStore((s) => s.quiet);
 
   const exercises = useMemo<Exercise[]>(
-    () => buildSession(words, sentences, todayStr(), { sttSupported: sttSupported() }),
+    () => buildSession(words, sentences, todayStr(), { sttSupported: sttSupported(), quiet }),
     // 세션 시작 시 1회만 구성
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -45,7 +47,7 @@ export default function SessionPage() {
     if (ex.kind === 'mcq' || ex.kind === 'speakWord') {
       await recordWord(ex.wordId, correct);
       if (!correct) setWrongItems((w) => [...w, ex.kind === 'mcq' ? ex.prompt : ex.english]);
-    } else if (ex.kind === 'repeatSentence' || ex.kind === 'dictation') {
+    } else if (ex.kind === 'repeatSentence' || ex.kind === 'dictation' || ex.kind === 'writeSentence') {
       await recordSentence(ex.sentenceId, correct);
       if (!correct) setWrongItems((w) => [...w, ex.text]);
     }
@@ -77,6 +79,9 @@ export default function SessionPage() {
         {ex.kind === 'speakWord' && <SpeakWordCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
         {ex.kind === 'repeatSentence' && <RepeatSentenceCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
         {ex.kind === 'dictation' && <DictationCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+        {ex.kind === 'writeSentence' && (
+          <WriteSentenceCard key={index} text={ex.text} translation={ex.translation} onDone={(c) => handleDone(ex, c)} />
+        )}
       </div>
     </div>
   );

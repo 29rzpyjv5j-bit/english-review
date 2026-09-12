@@ -1,14 +1,22 @@
 import type { Word, Sentence, Direction } from '../../types';
 import { selectSessionItems, type SessionCandidate } from '../../lib/leitner';
 
-export type ExerciseKind = 'matching' | 'mcq' | 'speakWord' | 'repeatSentence' | 'dictation';
+export type ExerciseKind =
+  | 'matching'
+  | 'mcq'
+  | 'speakWord'
+  | 'repeatSentence'
+  | 'dictation'
+  | 'writeSentence';
 
 export type Exercise =
   | { kind: 'matching'; pairs: { id: string; english: string; meaning: string }[] }
   | { kind: 'mcq'; wordId: string; prompt: string; answer: string; choices: string[]; direction: Direction }
   | { kind: 'speakWord'; wordId: string; english: string; meaning: string }
-  | { kind: 'repeatSentence'; sentenceId: string; text: string }
-  | { kind: 'dictation'; sentenceId: string; text: string; translation?: string };
+  | { kind: 'repeatSentence'; sentenceId: string; text: string; translation?: string }
+  | { kind: 'dictation'; sentenceId: string; text: string; translation?: string }
+  // 뜻을 보고 영어 문장을 타이핑한다(소리 불필요 — 무음 학습용).
+  | { kind: 'writeSentence'; sentenceId: string; text: string; translation: string };
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -36,16 +44,20 @@ export function buildSession(
   words: Word[],
   sentences: Sentence[],
   today: string,
-  opts: { size?: number; sttSupported?: boolean } = {},
+  opts: { size?: number; sttSupported?: boolean; quiet?: boolean } = {},
 ): Exercise[] {
   const size = opts.size ?? 12;
-  const stt = opts.sttSupported ?? false;
+  const quiet = opts.quiet ?? false;
+  // 무음 학습이면 말하기 문제를 내지 않는다.
+  const stt = (opts.sttSupported ?? false) && !quiet;
 
   const candidates: SessionCandidate[] = [
     ...words.map((w) => ({ id: w.id, box: w.box, dueDate: w.dueDate, kind: 'word' as const })),
     ...sentences.map((s) => ({ id: s.id, box: s.box, dueDate: s.dueDate, kind: 'sentence' as const })),
   ];
-  const chosen = selectSessionItems(candidates, today, size);
+  // 우선순위(복습일·박스)가 같은 항목들 사이의 순서를 섞는다. 섞지 않으면 목록 순서상
+  // 단어가 항상 문장보다 앞서서, 단어가 많을 때 문장이 한 번도 출제되지 않는다.
+  const chosen = selectSessionItems(shuffle(candidates), today, size);
 
   const wordById = new Map(words.map((w) => [w.id, w]));
   const sentById = new Map(sentences.map((s) => [s.id, s]));
@@ -77,7 +89,20 @@ export function buildSession(
       const sentence = sentById.get(c.id);
       if (!sentence) return;
       if (stt) {
-        exercises.push({ kind: 'repeatSentence', sentenceId: sentence.id, text: sentence.text });
+        exercises.push({
+          kind: 'repeatSentence',
+          sentenceId: sentence.id,
+          text: sentence.text,
+          translation: sentence.translation,
+        });
+      } else if (quiet && sentence.translation) {
+        // 무음 학습: 번역이 있으면 뜻을 보고 영작(소리 불필요), 없으면 받아쓰기.
+        exercises.push({
+          kind: 'writeSentence',
+          sentenceId: sentence.id,
+          text: sentence.text,
+          translation: sentence.translation,
+        });
       } else {
         exercises.push({ kind: 'dictation', sentenceId: sentence.id, text: sentence.text, translation: sentence.translation });
       }

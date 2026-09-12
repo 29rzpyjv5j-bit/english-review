@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import StatusBar from '../../components/StatusBar';
-import { Flame, Chevron } from '../../components/icons';
+import { Flame, Chevron, Mic, MicOff } from '../../components/icons';
 import { exportData, importData, type BackupData } from '../../db/backup';
 
 function Ring({ frac }: { frac: number }) {
@@ -35,6 +35,8 @@ export default function HomePage() {
   const words = useStore((s) => s.words);
   const sentences = useStore((s) => s.sentences);
   const streakCount = useStore((s) => s.profile.streakCount);
+  const quiet = useStore((s) => s.quiet);
+  const setQuiet = useStore((s) => s.setQuiet);
 
   const countFor = (deckId: string) => ({
     w: words.filter((w) => w.deckId === deckId).length,
@@ -106,6 +108,26 @@ export default function HomePage() {
         틀린 항목 복습하기
         <Chevron className="w-4 h-4 ml-auto" />
       </Link>
+
+      <button
+        onClick={() => setQuiet(!quiet)}
+        role="switch"
+        aria-checked={quiet}
+        className="w-full flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-left active:opacity-90"
+      >
+        <span className={`grid place-items-center w-7 h-7 rounded-full ${quiet ? 'bg-accent/15 text-accent' : 'bg-surface2 text-muted'}`}>
+          {quiet ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+        </span>
+        <span className="min-w-0">
+          <span className="block text-sm font-medium">무음 학습</span>
+          <span className="block text-xs text-muted">
+            {quiet ? '말하기 대신 쓰기로 나와요' : '밖에서는 켜면 말하기 없이 학습해요'}
+          </span>
+        </span>
+        <span className={`ml-auto shrink-0 w-11 h-6 rounded-full p-0.5 transition-colors ${quiet ? 'bg-accent' : 'bg-line'}`}>
+          <span className={`block w-5 h-5 rounded-full bg-ink transition-transform ${quiet ? 'translate-x-5' : ''}`} />
+        </span>
+      </button>
 
       <div>
         <button
