@@ -66,21 +66,21 @@ export default function MatchingCard({
   return (
     <div>
       <p className="text-sm text-muted mb-3">같은 뜻끼리 연결하세요</p>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          {left.map((t) => (
-            <button key={`en-${t.id}`} className={`block w-full rounded-xl border py-3 font-medium ${cls(t)}`} onClick={() => pick(t)}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div className="space-y-2">
-          {right.map((t) => (
-            <button key={`ko-${t.id}`} className={`block w-full rounded-xl border py-3 font-medium ${cls(t)}`} onClick={() => pick(t)}>
-              {t.label}
-            </button>
-          ))}
-        </div>
+      <div className="space-y-2">
+        {left.map((t, i) => {
+          const rightItem = right[i];
+          if (!rightItem) return null;
+          return (
+            <div key={i} className="grid grid-cols-2 gap-3 auto-rows-fr">
+              <button className={`block w-full rounded-xl border py-3 font-medium ${cls(t)}`} onClick={() => pick(t)}>
+                {t.label}
+              </button>
+              <button className={`block w-full rounded-xl border py-3 font-medium ${cls(rightItem)}`} onClick={() => pick(rightItem)}>
+                {rightItem.label}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
