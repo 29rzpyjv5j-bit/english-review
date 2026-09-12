@@ -115,3 +115,12 @@ export function MicOff({ className }: IconProps) {
     </Svg>
   );
 }
+
+export function Settings({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m-8.48 3.08l4.24-4.24M20 12h-6m-6 0H2M19.78 4.22l-4.24 4.24m8.48 3.08l-4.24-4.24M19.78 19.78l-4.24-4.24m8.48-3.08l-4.24 4.24M4.22 19.78l4.24-4.24" />
+    </Svg>
+  );
+}

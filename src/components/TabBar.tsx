@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Study, Shop } from './icons';
+import { Home, Shop, Settings } from './icons';
 
 const tabs = [
   { to: '/', label: '홈', Icon: Home },
-  { to: '/session', label: '학습', Icon: Study },
   { to: '/shop', label: '상점', Icon: Shop },
+  { to: '/settings', label: '설정', Icon: Settings },
 ];
 
 export default function TabBar() {
