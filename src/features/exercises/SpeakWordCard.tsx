@@ -13,6 +13,8 @@ export default function SpeakWordCard({
   const [result, setResult] = useState<null | boolean>(null);
   const [writing, setWriting] = useState(false);
   const [typed, setTyped] = useState('');
+  // 틀리면 다시 할 기회는 한 번뿐. 그 다음엔 오답으로 넘기고 복습 목록에 담는다.
+  const [retried, setRetried] = useState(false);
 
   async function record() {
     if (!sttSupported()) { onDone(true); return; }
@@ -97,17 +99,21 @@ export default function SpeakWordCard({
         <div className="space-y-2">
           <p className="text-sm text-muted">인식: {heard || '(없음)'}</p>
           <p className={result ? 'text-accent font-bold' : 'text-danger font-bold'}>
-            {result ? '좋아요! 🎉' : '다시 연습해요'}
+            {result ? '좋아요! 🎉' : retried ? '복습 목록에 담을게요' : '다시 연습해요'}
           </p>
           {result ? (
             <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(true)}>
+              다음
+            </button>
+          ) : retried ? (
+            <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(false)}>
               다음
             </button>
           ) : (
             <div className="flex gap-2">
               <button
                 className="flex-1 rounded-xl bg-accent text-accentInk py-3 text-sm font-medium active:opacity-90"
-                onClick={() => { setResult(null); setHeard(''); setStatus('idle'); }}
+                onClick={() => { setRetried(true); setResult(null); setHeard(''); setStatus('idle'); }}
               >
                 다시 말하기
               </button>

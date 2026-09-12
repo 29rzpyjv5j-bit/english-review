@@ -23,6 +23,8 @@ export interface Sentence {
   deckId: string;
   text: string;
   translation?: string;
+  /** 이 예문이 연습하는 표현. 예문과 함께 외울 수 있게 답을 낸 뒤 보여준다. */
+  keyword?: string;
   box: number;
   dueDate: string;
   seen: number;

@@ -9,6 +9,8 @@ export default function McqCard({
   ex, onDone,
 }: { ex: Extract<Exercise, { kind: 'mcq' }>; onDone: (c: boolean) => void }) {
   const [picked, setPicked] = useState<string | null>(null);
+  // 틀리면 다시 풀 기회는 한 번뿐. 그 다음엔 오답으로 넘기고 복습 목록에 담는다.
+  const [retried, setRetried] = useState(false);
 
   // 맨 처음 단어 발음 한 번 재생 (en2ko일 때만)
   useEffect(() => {
@@ -73,7 +75,7 @@ export default function McqCard({
       {picked && (
         <div className="space-y-2">
           <p className={isCorrect ? 'text-accent font-bold' : 'text-danger font-bold'}>
-            {isCorrect ? '정답이에요! 🎉' : '다시 선택해요'}
+            {isCorrect ? '정답이에요! 🎉' : retried ? `정답은 ${ex.answer}` : '다시 선택해요'}
           </p>
           {isCorrect ? (
             <button
@@ -82,11 +84,18 @@ export default function McqCard({
             >
               다음
             </button>
+          ) : retried ? (
+            <button
+              className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90"
+              onClick={() => onDone(false)}
+            >
+              다음
+            </button>
           ) : (
             <div className="flex gap-2">
               <button
                 className="flex-1 rounded-xl bg-accent text-accentInk py-3 text-sm font-medium active:opacity-90"
-                onClick={() => setPicked(null)}
+                onClick={() => { setRetried(true); setPicked(null); }}
               >
                 다시 선택
               </button>

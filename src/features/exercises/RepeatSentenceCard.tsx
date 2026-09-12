@@ -13,6 +13,8 @@ export default function RepeatSentenceCard({
   const [heard, setHeard] = useState('');
   const [result, setResult] = useState<null | boolean>(null);
   const [writing, setWriting] = useState(false);
+  // 틀리면 다시 할 기회는 한 번뿐. 그 다음엔 오답으로 넘기고 복습 목록에 담는다.
+  const [retried, setRetried] = useState(false);
 
   useEffect(() => { speak(ex.text); }, [ex.text]);
 
@@ -39,7 +41,7 @@ export default function RepeatSentenceCard({
     <div className="space-y-5">
       <p className="text-sm text-muted">듣고 따라 말하세요</p>
       <p className="text-2xl font-bold leading-snug">{ex.text}</p>
-      {ex.translation && <p className="text-base text-muted">{ex.translation}</p>}
+      {/* 키워드와 뜻은 말하기를 제출한 뒤에 보여준다(미리 보면 듣기 연습이 되지 않는다). */}
       <button
         className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm active:opacity-90"
         onClick={() => speak(ex.text)}
@@ -66,19 +68,29 @@ export default function RepeatSentenceCard({
         </div>
       ) : (
         <div className="space-y-2">
+          {(ex.keyword || ex.translation) && (
+            <div className="rounded-xl border border-line bg-surface p-3 space-y-1">
+              {ex.keyword && <p className="text-sm font-medium text-accent">{ex.keyword}</p>}
+              {ex.translation && <p className="text-sm text-muted">{ex.translation}</p>}
+            </div>
+          )}
           <p className="text-sm text-muted">인식: {heard || '(없음)'}</p>
           <p className={result ? 'text-accent font-bold' : 'text-danger font-bold'}>
-            {result ? '훌륭해요! 🎉' : '한 번 더 연습해요'}
+            {result ? '훌륭해요! 🎉' : retried ? '복습 목록에 담을게요' : '한 번 더 연습해요'}
           </p>
           {result ? (
             <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(true)}>
+              다음
+            </button>
+          ) : retried ? (
+            <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(false)}>
               다음
             </button>
           ) : (
             <div className="flex gap-2">
               <button
                 className="flex-1 rounded-xl bg-accent text-accentInk py-3 text-sm font-medium active:opacity-90"
-                onClick={() => { setResult(null); setHeard(''); }}
+                onClick={() => { setRetried(true); setResult(null); setHeard(''); }}
               >
                 다시 말하기
               </button>

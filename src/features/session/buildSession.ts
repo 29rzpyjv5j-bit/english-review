@@ -13,7 +13,7 @@ export type Exercise =
   | { kind: 'matching'; pairs: { id: string; english: string; meaning: string }[] }
   | { kind: 'mcq'; wordId: string; prompt: string; answer: string; choices: string[]; direction: Direction }
   | { kind: 'speakWord'; wordId: string; english: string; meaning: string }
-  | { kind: 'repeatSentence'; sentenceId: string; text: string; translation?: string }
+  | { kind: 'repeatSentence'; sentenceId: string; text: string; translation?: string; keyword?: string }
   | { kind: 'dictation'; sentenceId: string; text: string; translation?: string }
   // 뜻을 보고 영어 문장을 타이핑한다(소리 불필요 — 무음 학습용).
   | { kind: 'writeSentence'; sentenceId: string; text: string; translation: string };
@@ -94,6 +94,7 @@ export function buildSession(
           sentenceId: sentence.id,
           text: sentence.text,
           translation: sentence.translation,
+          keyword: sentence.keyword,
         });
       } else if (quiet && sentence.translation) {
         // 무음 학습: 번역이 있으면 뜻을 보고 영작(소리 불필요), 없으면 받아쓰기.

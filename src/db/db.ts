@@ -73,12 +73,12 @@ export async function addWords(
 
 export async function addSentences(
   deckId: string,
-  items: { text: string; translation?: string }[],
+  items: { text: string; translation?: string; keyword?: string }[],
 ): Promise<Sentence[]> {
   const db = await getDB();
   const today = todayStr();
   const sentences: Sentence[] = items.map((it) => ({
-    id: newId(), deckId, text: it.text, translation: it.translation,
+    id: newId(), deckId, text: it.text, translation: it.translation, keyword: it.keyword,
     box: 1, dueDate: today, seen: 0, correct: 0, wrong: 0,
   }));
   const tx = db.transaction('sentences', 'readwrite');

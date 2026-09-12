@@ -6,6 +6,7 @@ export interface ParsedWord {
 export interface ParsedSentence {
   text: string;
   translation?: string;
+  keyword?: string;
 }
 
 export interface ParsedItems {

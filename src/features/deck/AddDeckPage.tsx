@@ -178,7 +178,7 @@ export default function AddDeckPage() {
         if (isWordFormat) {
           deckGroups[deckName].words.push({ english: parts[1], meaning: parts[2] });
         } else if (isSentenceFormat) {
-          deckGroups[deckName].sentences.push({ text: parts[1], translation: parts[2] });
+          deckGroups[deckName].sentences.push({ text: parts[1], translation: parts[2], keyword: parts[3] || undefined });
         }
       }
 
