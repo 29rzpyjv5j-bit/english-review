@@ -119,9 +119,19 @@ export function MicOff({ className }: IconProps) {
 export function Settings({ className }: IconProps) {
   return (
     <Svg className={className}>
-      <circle cx="12" cy="12" r="2.5" />
-      <path d="M12 1v2.5m0 14v2.5M23 12h-2.5M3.5 12H1M18.5 5.5l1.75-1.75M4.75 18.25l1.75-1.75M5.5 5.5l-1.75-1.75M18.25 18.25l-1.75-1.75" />
-      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <g>
+        {/* 톱니 8개 */}
+        <rect x="10.5" y="1" width="3" height="3" rx="0.5" />
+        <rect x="18.5" y="5.5" width="3" height="3" rx="0.5" transform="rotate(45 20 7)" />
+        <rect x="19.5" y="10.5" width="3" height="3" rx="0.5" />
+        <rect x="18.5" y="15.5" width="3" height="3" rx="0.5" transform="rotate(-45 20 17)" />
+        <rect x="10.5" y="20" width="3" height="3" rx="0.5" />
+        <rect x="2.5" y="15.5" width="3" height="3" rx="0.5" transform="rotate(45 4 17)" />
+        <rect x="1.5" y="10.5" width="3" height="3" rx="0.5" />
+        <rect x="2.5" y="5.5" width="3" height="3" rx="0.5" transform="rotate(-45 4 7)" />
+        {/* 중심 원 */}
+        <circle cx="12" cy="12" r="4" />
+      </g>
     </Svg>
   );
 }
