@@ -120,7 +120,8 @@ export function Settings({ className }: IconProps) {
   return (
     <Svg className={className}>
       <circle cx="12" cy="12" r="3" />
-      <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m-8.48 3.08l4.24-4.24M20 12h-6m-6 0H2M19.78 4.22l-4.24 4.24m8.48 3.08l-4.24-4.24M19.78 19.78l-4.24-4.24m8.48-3.08l-4.24 4.24M4.22 19.78l4.24-4.24" />
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 2v2m0 12v2M18 12h2M2 12h2M16.24 7.76l1.41-1.41M6.35 17.65l1.41-1.41M7.76 7.76l-1.41-1.41M17.65 17.65l-1.41-1.41" />
     </Svg>
   );
 }

@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import StatusBar from '../../components/StatusBar';
-import { Flame, Chevron, Mic, MicOff } from '../../components/icons';
+import { Flame, Chevron, Mic, MicOff, Check } from '../../components/icons';
+import { todayStr } from '../../lib/dateUtils';
 
 function Ring({ frac }: { frac: number }) {
   const C = 2 * Math.PI * 15.5;
@@ -29,13 +30,20 @@ function Ring({ frac }: { frac: number }) {
 }
 
 export default function HomePage() {
-  const streakCount = useStore((s) => s.profile.streakCount);
+  const profile = useStore((s) => s.profile);
   const quiet = useStore((s) => s.quiet);
   const setQuiet = useStore((s) => s.setQuiet);
 
+  const streakCount = profile.streakCount;
   const inCycle = streakCount % 7;
   const frac = streakCount === 0 ? 0 : inCycle === 0 ? 1 : inCycle / 7;
   const toReward = streakCount === 0 ? 7 : inCycle === 0 ? 0 : 7 - inCycle;
+
+  // 오늘 학습 완료 여부
+  const today = todayStr();
+  const todayCompleted = profile.history.some((h) => h.date === today && h.completed);
+  // 오늘 학습을 완료하면 링을 100%로 채움
+  const todayFrac = todayCompleted ? 1 : frac;
 
   const wrongItemsToday = useStore((s) => s.wrongItemsToday);
   const hasWrongItems = wrongItemsToday.size > 0;
@@ -45,13 +53,27 @@ export default function HomePage() {
       <StatusBar />
 
       <Link to="/session" className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-4 active:opacity-90">
-        <Ring frac={frac} />
+        {todayCompleted ? (
+          <div className="relative w-16 h-16 flex-none">
+            <div className="absolute inset-0 grid place-items-center text-accent bg-accent/15 rounded-full">
+              <Check className="w-8 h-8" />
+            </div>
+          </div>
+        ) : (
+          <Ring frac={todayFrac} />
+        )}
         <div className="min-w-0">
           <p className="text-base font-bold">오늘의 학습</p>
-          <p className="text-sm text-muted">
-            {toReward === 0 ? '오늘도 이어가요 🔥' : `다음 보상까지 ${toReward}일`}
-          </p>
-          <p className="mt-1 text-sm font-semibold text-accent">이어서 시작하기 →</p>
+          {todayCompleted ? (
+            <p className="text-sm text-accent">완료했어요 🎉</p>
+          ) : (
+            <p className="text-sm text-muted">
+              {toReward === 0 ? '오늘도 이어가요 🔥' : `다음 보상까지 ${toReward}일`}
+            </p>
+          )}
+          {!todayCompleted && (
+            <p className="mt-1 text-sm font-semibold text-accent">이어서 시작하기 →</p>
+          )}
         </div>
       </Link>
 
