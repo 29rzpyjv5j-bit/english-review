@@ -12,7 +12,9 @@ export default function TabBar() {
   return (
     // 불투명 배경으로 바닥에 붙은 하나의 바처럼 보이게 하고, 아래 여백은 홈 인디케이터
     // 높이(safe-area)만큼만 남겨 아이콘이 화면 바닥 가까이 오도록 한다.
-    <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-surface pt-1.5 pb-[calc(env(safe-area-inset-bottom)+0.375rem)]">
+    // 배경을 페이지와 같은 색으로 둔다. 탭바만 밝으면 그 아래(홈 인디케이터 영역·
+    // 스탠드얼론에서 시스템이 칠하는 영역)가 어둡게 남아 바가 떠 보인다.
+    <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-bg pt-1.5 pb-[calc(env(safe-area-inset-bottom)+0.375rem)]">
       <div className="max-w-md mx-auto flex">
         {tabs.map(({ to, label, Icon }) => {
           const active = to === '/' ? pathname === '/' : pathname.startsWith(to);
