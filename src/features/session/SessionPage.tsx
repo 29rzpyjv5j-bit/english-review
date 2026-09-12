@@ -67,14 +67,17 @@ export default function SessionPage() {
   }
 
   const ex = exercises[index];
+  // 진행바는 위에 고정하고, 카드는 남은 공간의 세로 중앙에 둔다(폰에서 누르기 쉬운 위치).
   return (
-    <div className="max-w-md mx-auto p-4 space-y-6">
+    <div className="max-w-md mx-auto p-4 min-h-[calc(100dvh-env(safe-area-inset-top)-2rem)] flex flex-col gap-6">
       <ProgressBar value={index} max={exercises.length} />
-      {ex.kind === 'matching' && <MatchingCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
-      {ex.kind === 'mcq' && <McqCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
-      {ex.kind === 'speakWord' && <SpeakWordCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
-      {ex.kind === 'repeatSentence' && <RepeatSentenceCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
-      {ex.kind === 'dictation' && <DictationCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+      <div className="flex-1 flex flex-col justify-center pb-8">
+        {ex.kind === 'matching' && <MatchingCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+        {ex.kind === 'mcq' && <McqCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+        {ex.kind === 'speakWord' && <SpeakWordCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+        {ex.kind === 'repeatSentence' && <RepeatSentenceCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+        {ex.kind === 'dictation' && <DictationCard key={index} ex={ex} onDone={(c) => handleDone(ex, c)} />}
+      </div>
     </div>
   );
 }

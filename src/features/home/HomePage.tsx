@@ -48,6 +48,7 @@ export default function HomePage() {
   const load = useStore((s) => s.load);
   const fileRef = useRef<HTMLInputElement>(null);
   const [backupMsg, setBackupMsg] = useState('');
+  const [decksOpen, setDecksOpen] = useState(false);
 
   async function onExport() {
     const data = await exportData();
@@ -107,19 +108,29 @@ export default function HomePage() {
       </Link>
 
       <div>
-        <h2 className="text-xs font-bold uppercase tracking-wider text-muted mb-2">내 자료</h2>
-        <ul className="space-y-2">
-          {decks.length === 0 && <li className="text-muted text-sm">아직 자료가 없어요.</li>}
-          {decks.map((d) => {
-            const c = countFor(d.id);
-            return (
-              <li key={d.id} className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3">
-                <p className="font-medium">{d.name}</p>
-                <p className="text-xs text-muted tabular-nums">단어 {c.w} · 문장 {c.s}</p>
-              </li>
-            );
-          })}
-        </ul>
+        <button
+          onClick={() => setDecksOpen((o) => !o)}
+          aria-expanded={decksOpen}
+          className="w-full flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-left active:opacity-90"
+        >
+          <span className="text-sm font-medium">내 자료</span>
+          <span className="text-xs text-muted tabular-nums">{decks.length}개</span>
+          <Chevron className={`w-4 h-4 ml-auto text-muted transition-transform ${decksOpen ? 'rotate-90' : ''}`} />
+        </button>
+        {decksOpen && (
+          <ul className="space-y-2 mt-2">
+            {decks.length === 0 && <li className="text-muted text-sm px-1">아직 자료가 없어요.</li>}
+            {decks.map((d) => {
+              const c = countFor(d.id);
+              return (
+                <li key={d.id} className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3">
+                  <p className="font-medium text-sm">{d.name}</p>
+                  <p className="text-xs text-muted tabular-nums shrink-0 ml-3">단어 {c.w} · 문장 {c.s}</p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       <Link

@@ -10,7 +10,7 @@ const tabs = [
 export default function TabBar() {
   const { pathname } = useLocation();
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-surface/95 backdrop-blur">
+    <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-md mx-auto flex">
         {tabs.map(({ to, label, Icon }) => {
           const active = to === '/' ? pathname === '/' : pathname.startsWith(to);

@@ -20,8 +20,9 @@ export default function App() {
   // 세션(학습) 화면과 자료 추가 화면은 몰입/집중을 위해 탭바를 숨긴다.
   const showTabBar = pathname === '/' || pathname === '/shop';
 
+  // 노치/상태바를 피하도록 상단 세이프 에어리어 + 약간의 여백을 준다(홈 화면 설치 시 특히 중요).
   return (
-    <div className={showTabBar ? 'pb-20' : ''}>
+    <div className={`pt-[calc(env(safe-area-inset-top)+0.5rem)] ${showTabBar ? 'pb-24' : ''}`}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/add" element={<AddDeckPage />} />
