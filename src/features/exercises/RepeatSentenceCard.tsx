@@ -39,6 +39,7 @@ export default function RepeatSentenceCard({
     <div className="space-y-5">
       <p className="text-sm text-muted">듣고 따라 말하세요</p>
       <p className="text-2xl font-bold leading-snug">{ex.text}</p>
+      {ex.translation && <p className="text-base text-muted">{ex.translation}</p>}
       <button
         className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm active:opacity-90"
         onClick={() => speak(ex.text)}
@@ -69,7 +70,23 @@ export default function RepeatSentenceCard({
           <p className={result ? 'text-accent font-bold' : 'text-danger font-bold'}>
             {result ? '훌륭해요! 🎉' : '한 번 더 연습해요'}
           </p>
-          <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(result)}>다음</button>
+          {result ? (
+            <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(true)}>
+              다음
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                className="flex-1 rounded-xl bg-accent text-accentInk py-3 text-sm font-medium active:opacity-90"
+                onClick={() => { setResult(null); setHeard(''); }}
+              >
+                다시 말하기
+              </button>
+              <button className="flex-1 rounded-xl border border-line bg-surface py-3 text-sm font-medium active:opacity-90" onClick={() => onDone(false)}>
+                다음
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

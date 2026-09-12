@@ -5,6 +5,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import SessionPage from './SessionPage';
 
+vi.mock('../../speech/tts', () => ({ speak: vi.fn().mockResolvedValue(undefined), ttsSupported: () => true }));
+vi.mock('../../speech/stt', () => ({ listen: vi.fn().mockResolvedValue('test'), sttSupported: () => false }));
+
 beforeEach(() => {
   useStore.setState({
     loaded: true, decks: [{ id: 'd', name: 'D', createdAt: 0 }],
@@ -23,14 +26,21 @@ describe('SessionPage', () => {
     const complete = vi.spyOn(useStore.getState(), 'completeSession');
     render(<MemoryRouter><SessionPage /></MemoryRouter>);
 
-    // 카드가 소진될 때까지 첫 번째 선택지/버튼을 계속 누른다.
+    // 카드가 소진될 때까지 계속 진행한다.
     for (let i = 0; i < 20; i++) {
       const buttons = screen.queryAllByRole('button');
       const done = screen.queryByText(/학습 완료/);
       if (done) break;
-      // '다음' 이 있으면 다음, 아니면 첫 상호작용 버튼
+      // '다음' 이 있으면 다음
       const next = buttons.find((b) => b.textContent === '다음');
-      await user.click(next ?? buttons[0]);
+      if (next) {
+        await user.click(next);
+      } else {
+        // '다음'이 없으면 MCQ 선택지(text-left)나 말하기 버튼 찾기
+        const choice = buttons.find((b) => b.classList.contains('text-left'));
+        const speak = buttons.find((b) => b.textContent.includes('말하기') || b.textContent.includes('확인'));
+        await user.click(choice ?? speak ?? buttons[0]);
+      }
     }
     expect(screen.getByText(/학습 완료/)).toBeInTheDocument();
     expect(complete).toHaveBeenCalled();
@@ -43,9 +53,10 @@ describe('SessionPage', () => {
     // 첫 mcq 카드: 아직 선택 전이라 '다음' 버튼이 없어야 한다.
     expect(screen.queryByText('다음')).toBeNull();
 
-    // 아무 선택지나 고르면 '다음' 버튼이 나타난다.
+    // MCQ 선택지를 고르면 '다음' 버튼이 나타난다.
     const firstCardButtons = screen.getAllByRole('button');
-    await user.click(firstCardButtons[0]);
+    const choice = firstCardButtons.find((b) => b.classList.contains('text-left'));
+    await user.click(choice || firstCardButtons[0]);
     expect(screen.getByText('다음')).toBeInTheDocument();
 
     // 다음 카드로 이동한다. 이동은 복습 기록(DB 쓰기)을 await 한 뒤 일어나므로 기다린다.

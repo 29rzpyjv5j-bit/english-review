@@ -99,7 +99,23 @@ export default function SpeakWordCard({
           <p className={result ? 'text-accent font-bold' : 'text-danger font-bold'}>
             {result ? '좋아요! 🎉' : '다시 연습해요'}
           </p>
-          <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(result)}>다음</button>
+          {result ? (
+            <button className="w-full rounded-xl border border-line bg-surface py-3 font-medium active:opacity-90" onClick={() => onDone(true)}>
+              다음
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                className="flex-1 rounded-xl bg-accent text-accentInk py-3 text-sm font-medium active:opacity-90"
+                onClick={() => { setResult(null); setHeard(''); setStatus('idle'); }}
+              >
+                다시 말하기
+              </button>
+              <button className="flex-1 rounded-xl border border-line bg-surface py-3 text-sm font-medium active:opacity-90" onClick={() => onDone(false)}>
+                다음
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
