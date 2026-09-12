@@ -1,8 +1,18 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
-import { parseWords, parseSentences } from '../../lib/parse';
+import { parseWords, parseSentences, type ParsedWord, type ParsedSentence } from '../../lib/parse';
 import { extractText } from '../../files/extract';
+import { getApiKey, setApiKey } from '../../ai/apiKey';
+import { organizeMaterial } from '../../ai/organize';
+
+// AI 정리 결과(ParsedItems)를 입력칸 텍스트 형식으로 되돌린다(사용자가 검토·수정 가능).
+function wordsToText(words: ParsedWord[]): string {
+  return words.map((w) => `${w.english} = ${w.meaning}`).join('\n');
+}
+function sentencesToText(sentences: ParsedSentence[]): string {
+  return sentences.map((s) => (s.translation ? `${s.text} | ${s.translation}` : s.text)).join('\n');
+}
 
 export default function AddDeckPage() {
   const navigate = useNavigate();
@@ -15,6 +25,14 @@ export default function AddDeckPage() {
   const [fileError, setFileError] = useState('');
   const [extracting, setExtracting] = useState(false);
   const [saveError, setSaveError] = useState('');
+
+  // AI 자동 정리
+  const [rawText, setRawText] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [apiKey, setApiKeyState] = useState(getApiKey());
+  const [keyDraft, setKeyDraft] = useState('');
+  const [editingKey, setEditingKey] = useState(false);
 
   const parsedWords = useMemo(() => parseWords(wordsText), [wordsText]);
   const parsedSentences = useMemo(() => parseSentences(sentencesText), [sentencesText]);
@@ -49,12 +67,90 @@ export default function AddDeckPage() {
     }
   }
 
+  function saveKey() {
+    const k = keyDraft.trim();
+    setApiKey(k);
+    setApiKeyState(k);
+    setEditingKey(false);
+    setKeyDraft('');
+  }
+
+  async function onOrganize() {
+    if (!apiKey) {
+      setEditingKey(true);
+      setAiError('먼저 Claude API 키를 입력해 주세요.');
+      return;
+    }
+    if (!rawText.trim()) return;
+    setAiLoading(true);
+    setAiError('');
+    try {
+      const result = await organizeMaterial(apiKey, rawText.trim());
+      setWordsText(wordsToText(result.words));
+      setSentencesText(sentencesToText(result.sentences));
+      if (result.words.length + result.sentences.length === 0) {
+        setAiError('정리할 단어·문장을 찾지 못했어요. 원문을 확인해 주세요.');
+      }
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'AI 정리에 실패했어요.');
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   const fieldCls =
     'mt-1 w-full rounded-xl border border-line bg-surface p-3 text-ink placeholder:text-muted focus:outline-none focus:border-accent';
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
       <h1 className="text-xl font-bold">자료 추가</h1>
+
+      <div className="rounded-xl border border-accent/40 p-3 space-y-2 bg-accent/5">
+        <p className="text-sm font-medium text-accent">✨ AI로 정리 (Claude)</p>
+        <p className="text-xs text-muted">수업 자료 원문을 그대로 붙여넣으면 AI가 단어·문장으로 정리해 아래 칸을 채워줘요.</p>
+
+        {apiKey && !editingKey ? (
+          <p className="text-xs text-muted">
+            API 키 저장됨 ✓{' '}
+            <button className="text-accent underline" onClick={() => setEditingKey(true)}>변경</button>
+          </p>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="password"
+              aria-label="Claude API 키"
+              className="flex-1 rounded-lg border border-line bg-surface p-2 text-sm text-ink placeholder:text-muted focus:outline-none focus:border-accent"
+              value={keyDraft}
+              onChange={(e) => setKeyDraft(e.target.value)}
+              placeholder="Claude API 키 (sk-ant-...)"
+            />
+            <button
+              className="rounded-lg bg-accent text-accentInk px-3 text-sm font-bold disabled:opacity-50"
+              disabled={!keyDraft.trim()}
+              onClick={saveKey}
+            >
+              키 저장
+            </button>
+          </div>
+        )}
+
+        <textarea
+          aria-label="원문 붙여넣기"
+          className="w-full rounded-xl border border-line bg-surface p-3 h-28 text-sm text-ink placeholder:text-muted focus:outline-none focus:border-accent"
+          value={rawText}
+          onChange={(e) => setRawText(e.target.value)}
+          placeholder={'수업 프린트물 내용을 그대로 붙여넣으세요…'}
+        />
+        <button
+          className="w-full rounded-xl bg-accent text-accentInk py-2.5 font-bold disabled:opacity-50"
+          disabled={aiLoading || !rawText.trim()}
+          onClick={onOrganize}
+        >
+          {aiLoading ? 'AI가 정리하는 중…' : 'AI로 정리하기'}
+        </button>
+        {aiError && <p className="text-xs text-danger">{aiError}</p>}
+        <p className="text-xs text-muted">정리 1회에 약 10~30원. 키는 이 브라우저에만 저장돼요.</p>
+      </div>
 
       <div className="rounded-xl border border-line p-3 space-y-2 bg-surface">
         <p className="text-sm font-medium">파일에서 텍스트 가져오기</p>
