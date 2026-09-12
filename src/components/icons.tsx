@@ -119,9 +119,9 @@ export function MicOff({ className }: IconProps) {
 export function Settings({ className }: IconProps) {
   return (
     <Svg className={className}>
-      <circle cx="12" cy="12" r="3" />
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 2v2m0 12v2M18 12h2M2 12h2M16.24 7.76l1.41-1.41M6.35 17.65l1.41-1.41M7.76 7.76l-1.41-1.41M17.65 17.65l-1.41-1.41" />
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M12 1v2.5m0 14v2.5M23 12h-2.5M3.5 12H1M18.5 5.5l1.75-1.75M4.75 18.25l1.75-1.75M5.5 5.5l-1.75-1.75M18.25 18.25l-1.75-1.75" />
+      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.7" />
     </Svg>
   );
 }
