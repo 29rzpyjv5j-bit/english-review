@@ -42,7 +42,6 @@ const DEFAULT_PROFILE: Profile = {
   freezeCount: 0,
   dailyGoalSessions: 1,
   history: [],
-  currentLeague: 'Bronze',
 };
 
 export async function addDeck(name: string): Promise<Deck> {

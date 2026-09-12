@@ -7,7 +7,6 @@ import { applyStudyDay } from '../lib/streak';
 import { sessionReward, FREEZE_COST, FREEZE_MAX } from '../lib/gems';
 import { todayStr } from '../lib/dateUtils';
 import { getQuietMode, setQuietMode } from '../settings/quiet';
-import { getLeague } from '../lib/league';
 
 interface State {
   loaded: boolean;
@@ -31,7 +30,7 @@ interface State {
 }
 
 const EMPTY_PROFILE: Profile = {
-  streakCount: 0, lastStudyDate: null, gems: 0, freezeCount: 0, dailyGoalSessions: 1, history: [], currentLeague: 'Bronze',
+  streakCount: 0, lastStudyDate: null, gems: 0, freezeCount: 0, dailyGoalSessions: 1, history: [],
 };
 
 export const useStore = create<State>((set, get) => ({
@@ -115,7 +114,6 @@ export const useStore = create<State>((set, get) => ({
     const history = p.history.some((h) => h.date === today)
       ? p.history
       : [...p.history, { date: today, completed: true }];
-    const currentLeague = getLeague(streak.streakCount);
     const profile: Profile = {
       ...p,
       streakCount: streak.streakCount,
@@ -123,7 +121,6 @@ export const useStore = create<State>((set, get) => ({
       lastStudyDate: streak.lastStudyDate,
       gems: p.gems + gained,
       history,
-      currentLeague,
     };
     await db.saveProfile(profile);
     set({ profile });

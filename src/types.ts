@@ -1,5 +1,4 @@
 export type Direction = 'en2ko' | 'ko2en';
-export type League = 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Sapphire';
 
 export interface Deck {
   id: string;
@@ -38,5 +37,4 @@ export interface Profile {
   freezeCount: number;
   dailyGoalSessions: number;
   history: { date: string; completed: boolean }[];
-  currentLeague: League;
 }

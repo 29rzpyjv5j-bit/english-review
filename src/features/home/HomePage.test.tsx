@@ -10,7 +10,7 @@ beforeEach(() => {
     loaded: true, decks: [{ id: 'd1', name: 'Chapter 3', createdAt: 0 }],
     words: [{ id: 'w1', deckId: 'd1', english: 'a', meaning: 'ㄱ', box: 1, dueDate: '2026-09-11', seen: 0, correct: 0, wrong: 0 }],
     sentences: [],
-    profile: { streakCount: 12, lastStudyDate: '2026-09-10', gems: 340, freezeCount: 2, dailyGoalSessions: 1, history: [], currentLeague: 'Silver' },
+    profile: { streakCount: 12, lastStudyDate: '2026-09-10', gems: 340, freezeCount: 2, dailyGoalSessions: 1, history: [] },
   });
 });
 
