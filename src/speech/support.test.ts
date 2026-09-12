@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { ttsSupported } from './tts';
+import { ttsSupported, speakableText } from './tts';
 import { sttSupported } from './stt';
 
 afterEach(() => {
@@ -25,5 +25,21 @@ describe('speech support detection', () => {
   });
   it('reports no STT when absent', () => {
     expect(sttSupported()).toBe(false);
+  });
+});
+
+describe('speakableText', () => {
+  it('슬래시를 or로 읽어준다', () => {
+    expect(speakableText('barely/seldom/hardly')).toBe('barely or seldom or hardly');
+    expect(speakableText('put on/apply cream')).toBe('put on or apply cream');
+  });
+
+  it('자리표시자를 말이 되게 바꾼다', () => {
+    expect(speakableText('keep sb in the loop')).toBe('keep somebody in the loop');
+    expect(speakableText('insist on V')).toBe('insist on');
+  });
+
+  it('보통 표제어는 그대로 둔다', () => {
+    expect(speakableText('get off work')).toBe('get off work');
   });
 });

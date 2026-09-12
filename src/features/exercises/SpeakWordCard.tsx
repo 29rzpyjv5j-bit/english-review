@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Exercise } from '../session/buildSession';
 import { speak } from '../../speech/tts';
 import { listen, sttSupported } from '../../speech/stt';
-import { isCloseEnough } from '../../lib/grading';
+import { isSpokenMatch } from '../../lib/grading';
 import { Speaker, Mic } from '../../components/icons';
 
 export default function SpeakWordCard({
@@ -22,7 +22,7 @@ export default function SpeakWordCard({
     try {
       const transcript = await listen('en-US');
       setHeard(transcript);
-      const ok = isCloseEnough(transcript, ex.english, 0.7);
+      const ok = isSpokenMatch(transcript, ex.english);
       setResult(ok);
     } catch {
       setResult(false);
@@ -48,7 +48,7 @@ export default function SpeakWordCard({
         {result === null ? (
           <button
             className="w-full rounded-xl bg-accent text-accentInk py-3 font-bold active:opacity-90"
-            onClick={() => setResult(isCloseEnough(typed, ex.english))}
+            onClick={() => setResult(isSpokenMatch(typed, ex.english))}
           >
             확인
           </button>
