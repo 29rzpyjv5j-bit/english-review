@@ -16,7 +16,7 @@ export default function TabBar() {
     // 스탠드얼론에서 시스템이 칠하는 영역)가 어둡게 남아 바가 떠 보인다.
     // safe-area는 상한을 둔다. 홈 화면에 추가해 실행하면 기기에 따라 이 값이
     // 제스처 바보다 훨씬 크게 잡혀, 그대로 쓰면 아이콘이 화면 중간에 뜬다.
-    <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-bg pt-1.5 pb-[calc(min(env(safe-area-inset-bottom),0.75rem)+0.25rem)]">
+    <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-bg pt-1.5 pb-[calc(min(env(safe-area-inset-bottom),0.5rem)+0.25rem)]">
       <div className="max-w-md mx-auto flex">
         {tabs.map(({ to, label, Icon }) => {
           const active = to === '/' ? pathname === '/' : pathname.startsWith(to);
