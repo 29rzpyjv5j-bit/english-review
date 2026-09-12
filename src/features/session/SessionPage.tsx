@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { buildSession, type Exercise } from './buildSession';
+import { loadProgress, saveProgress, clearProgress } from './progress';
 import { sttSupported } from '../../speech/stt';
 import { todayStr } from '../../lib/dateUtils';
 import ProgressBar from '../../components/ProgressBar';
@@ -27,7 +28,13 @@ export default function SessionPage() {
   const completeSession = useStore((s) => s.completeSession);
   const quiet = useStore((s) => s.quiet);
 
+  const today = todayStr();
+  const mode = isReview ? 'review' : 'normal';
+  // 세션 시작 시 1회만 읽는다. 이후 저장으로 이 값이 바뀌어도 문제 구성은 그대로 둔다.
+  const [restored] = useState(() => loadProgress(today, mode));
+
   const exercises = useMemo<Exercise[]>(() => {
+    if (restored) return restored.exercises;
     if (isReview && wrongItemsToday.size === 0) {
       return [];
     }
@@ -41,14 +48,14 @@ export default function SessionPage() {
       reviewSentences = sentences.filter((s) => wrongItemsToday.has(s.id));
     }
 
-    return buildSession(reviewWords, reviewSentences, todayStr(), { sttSupported: sttSupported(), quiet });
+    return buildSession(reviewWords, reviewSentences, today, { sttSupported: sttSupported(), quiet });
     // 세션 시작 시 1회만 구성
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReview, words, sentences, wrongItemsToday]);
+  }, [isReview, words, sentences, wrongItemsToday, restored]);
 
-  const [index, setIndex] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [wrongItems, setWrongItems] = useState<{ id: string; text: string }[]>([]);
+  const [index, setIndex] = useState(restored?.index ?? 0);
+  const [correctCount, setCorrectCount] = useState(restored?.correctCount ?? 0);
+  const [wrongItems, setWrongItems] = useState<{ id: string; text: string }[]>(restored?.wrongItems ?? []);
   const [finished, setFinished] = useState(false);
   const [gained, setGained] = useState(0);
 
@@ -72,29 +79,33 @@ export default function SessionPage() {
 
   async function handleDone(ex: Exercise, correct: boolean) {
     // record + tallies
-    if (correct) setCorrectCount((c) => c + 1);
+    const nextCorrect = correctCount + (correct ? 1 : 0);
+    let nextWrong = wrongItems;
     if (ex.kind === 'mcq' || ex.kind === 'speakWord') {
       await recordWord(ex.wordId, correct);
       if (!correct) {
         const text = ex.kind === 'mcq' ? ex.prompt : ex.english;
-        setWrongItems((w) => [...w, { id: ex.wordId, text }]);
+        nextWrong = [...wrongItems, { id: ex.wordId, text }];
       }
     } else if (ex.kind === 'repeatSentence' || ex.kind === 'dictation' || ex.kind === 'writeSentence') {
       await recordSentence(ex.sentenceId, correct);
-      if (!correct) setWrongItems((w) => [...w, { id: ex.sentenceId, text: ex.text }]);
+      if (!correct) nextWrong = [...wrongItems, { id: ex.sentenceId, text: ex.text }];
     }
     // matching 카드는 내부에서 개별 record 처리(아래 카드 구현)
+    setCorrectCount(nextCorrect);
+    setWrongItems(nextWrong);
 
     const nextIndex = index + 1;
     if (nextIndex >= exercises.length) {
-      const total = exercises.length;
-      const result = await completeSession(correctCount + (correct ? 1 : 0), total);
+      const result = await completeSession(nextCorrect, exercises.length);
       setGained(result.gained);
       // review 모드에서는 완료 후 wrongItemsToday 초기화
       if (isReview) clearWrongItemsToday();
+      clearProgress();
       setFinished(true);
     } else {
       setIndex(nextIndex);
+      saveProgress({ date: today, mode, exercises, index: nextIndex, correctCount: nextCorrect, wrongItems: nextWrong });
     }
   }
 
