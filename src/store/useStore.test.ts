@@ -29,6 +29,29 @@ describe('useStore', () => {
     expect(w.seen).toBe(1);
   });
 
+  it('틀린 항목은 앱을 다시 켜도 복습 목록에 남고, 복습에서 맞히면 빠진다', async () => {
+    await useStore.getState().createDeck('D', [{ english: 'agenda', meaning: '안건' }], [{ text: 'Hi.' }]);
+    const wordId = useStore.getState().words[0].id;
+    const sentId = useStore.getState().sentences[0].id;
+    await useStore.getState().recordWord(wordId, false);
+    await useStore.getState().recordSentence(sentId, false);
+
+    // 앱 재시작: 메모리를 비우고 저장소에서 다시 읽는다.
+    useStore.setState({ loaded: false, words: [], sentences: [] });
+    await useStore.getState().load();
+    expect(useStore.getState().words[0].needsReview).toBe(true);
+    expect(useStore.getState().sentences[0].needsReview).toBe(true);
+
+    // 일반 학습에서 맞혀도 목록에 남는다.
+    await useStore.getState().recordWord(wordId, true, false);
+    expect(useStore.getState().words[0].needsReview).toBe(true);
+
+    // 복습에서 맞히면 빠진다.
+    await useStore.getState().recordWord(wordId, true, true);
+    await useStore.getState().load();
+    expect(useStore.getState().words[0].needsReview).toBe(false);
+  });
+
   it('completeSession awards gems and updates streak', async () => {
     const { gained } = await useStore.getState().completeSession(5, 5);
     const p = useStore.getState().profile;

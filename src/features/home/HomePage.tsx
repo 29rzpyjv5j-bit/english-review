@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore';
 import StatusBar from '../../components/StatusBar';
 import { Flame, Chevron, Mic, MicOff, Check } from '../../components/icons';
 import { todayStr } from '../../lib/dateUtils';
+import { inReview } from '../../lib/review';
 
 function Ring({ frac }: { frac: number }) {
   const C = 2 * Math.PI * 15.5;
@@ -45,8 +46,10 @@ export default function HomePage() {
   // 오늘 학습을 완료하면 링을 100%로 채움
   const todayFrac = todayCompleted ? 1 : frac;
 
-  const wrongItemsToday = useStore((s) => s.wrongItemsToday);
-  const hasWrongItems = wrongItemsToday.size > 0;
+  const words = useStore((s) => s.words);
+  const sentences = useStore((s) => s.sentences);
+  const reviewCount = words.filter(inReview).length + sentences.filter(inReview).length;
+  const hasWrongItems = reviewCount > 0;
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-5">
@@ -84,7 +87,7 @@ export default function HomePage() {
         <span className={`grid place-items-center w-7 h-7 rounded-full ${hasWrongItems ? 'bg-accent/15 text-accent' : 'bg-surface2 text-muted'}`}>
           <Flame className="w-4 h-4" />
         </span>
-        틀린 항목 복습하기 {hasWrongItems && `(${wrongItemsToday.size})`}
+        틀린 항목 복습하기 {hasWrongItems && `(${reviewCount})`}
         <Chevron className="w-4 h-4 ml-auto" />
       </Link>
 

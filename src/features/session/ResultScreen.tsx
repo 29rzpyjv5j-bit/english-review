@@ -1,18 +1,10 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Gem } from '../../components/icons';
-import { useStore } from '../../store/useStore';
 
 export default function ResultScreen({
   correct, total, gained, wrongItems,
 }: { correct: number; total: number; gained: number; wrongItems: { id: string; text: string }[] }) {
   const navigate = useNavigate();
-  const setWrongItemsToday = useStore((s) => s.setWrongItemsToday);
-
-  // 세션 종료 시 틀린 항목들을 저장
-  useEffect(() => {
-    setWrongItemsToday(new Set(wrongItems.map((item) => item.id)));
-  }, [wrongItems, setWrongItemsToday]);
   return (
     <div className="max-w-md mx-auto p-6 text-center space-y-5">
       <div className="pt-6">

@@ -11,6 +11,8 @@ export interface Word {
   deckId: string;
   english: string;
   meaning: string;
+  /** 틀린 항목 복습 목록에 있는지. 없으면 예전 기록으로 판단한다(lib/review). */
+  needsReview?: boolean;
   box: number; // 1..5
   dueDate: string; // 'YYYY-MM-DD'
   seen: number;
@@ -25,6 +27,7 @@ export interface Sentence {
   translation?: string;
   /** 이 예문이 연습하는 표현. 예문과 함께 외울 수 있게 답을 낸 뒤 보여준다. */
   keyword?: string;
+  needsReview?: boolean;
   box: number;
   dueDate: string;
   seen: number;

@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { buildSession, type Exercise } from './buildSession';
 import { loadProgress, saveProgress, clearProgress } from './progress';
 import { sttSupported } from '../../speech/stt';
 import { stopSpeaking } from '../../speech/tts';
+import { inReview } from '../../lib/review';
 import { todayStr } from '../../lib/dateUtils';
 import ProgressBar from '../../components/ProgressBar';
 import ResultScreen from './ResultScreen';
@@ -22,8 +23,6 @@ export default function SessionPage() {
 
   const words = useStore((s) => s.words);
   const sentences = useStore((s) => s.sentences);
-  const wrongItemsToday = useStore((s) => s.wrongItemsToday);
-  const clearWrongItemsToday = useStore((s) => s.clearWrongItemsToday);
   const recordWord = useStore((s) => s.recordWord);
   const recordSentence = useStore((s) => s.recordSentence);
   const completeSession = useStore((s) => s.completeSession);
@@ -34,25 +33,15 @@ export default function SessionPage() {
   // 세션 시작 시 1회만 읽는다. 이후 저장으로 이 값이 바뀌어도 문제 구성은 그대로 둔다.
   const [restored] = useState(() => loadProgress(today, mode));
 
-  const exercises = useMemo<Exercise[]>(() => {
+  // 문제 구성은 세션을 시작할 때 한 번만 정한다. 답할 때마다 단어 기록이 바뀌므로
+  // 그 기록에 맞춰 다시 만들면 풀던 도중에 문제 순서가 뒤바뀐다.
+  const [exercises] = useState<Exercise[]>(() => {
     if (restored) return restored.exercises;
-    if (isReview && wrongItemsToday.size === 0) {
-      return [];
-    }
-
-    let reviewWords = words;
-    let reviewSentences = sentences;
-
-    // review 모드: 틀린 항목만 필터링
-    if (isReview) {
-      reviewWords = words.filter((w) => wrongItemsToday.has(w.id));
-      reviewSentences = sentences.filter((s) => wrongItemsToday.has(s.id));
-    }
-
-    return buildSession(reviewWords, reviewSentences, today, { sttSupported: sttSupported(), quiet });
-    // 세션 시작 시 1회만 구성
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReview, words, sentences, wrongItemsToday, restored]);
+    const pool = isReview
+      ? { words: words.filter(inReview), sentences: sentences.filter(inReview) }
+      : { words, sentences };
+    return buildSession(pool.words, pool.sentences, today, { sttSupported: sttSupported(), quiet });
+  });
 
   const [index, setIndex] = useState(restored?.index ?? 0);
   // 문제를 넘기기 전에 앞 문제의 음성을 끊는다. 카드마다 스스로 읽어주지는 않아서
@@ -87,13 +76,13 @@ export default function SessionPage() {
     const nextCorrect = correctCount + (correct ? 1 : 0);
     let nextWrong = wrongItems;
     if (ex.kind === 'mcq' || ex.kind === 'speakWord') {
-      await recordWord(ex.wordId, correct);
+      await recordWord(ex.wordId, correct, isReview);
       if (!correct) {
         const text = ex.kind === 'mcq' ? ex.prompt : ex.english;
         nextWrong = [...wrongItems, { id: ex.wordId, text }];
       }
     } else if (ex.kind === 'repeatSentence' || ex.kind === 'dictation' || ex.kind === 'writeSentence') {
-      await recordSentence(ex.sentenceId, correct);
+      await recordSentence(ex.sentenceId, correct, isReview);
       if (!correct) nextWrong = [...wrongItems, { id: ex.sentenceId, text: ex.text }];
     }
     // matching 카드는 내부에서 개별 record 처리(아래 카드 구현)
@@ -104,8 +93,6 @@ export default function SessionPage() {
     if (nextIndex >= exercises.length) {
       const result = await completeSession(nextCorrect, exercises.length);
       setGained(result.gained);
-      // review 모드에서는 완료 후 wrongItemsToday 초기화
-      if (isReview) clearWrongItemsToday();
       clearProgress();
       setFinished(true);
     } else {
