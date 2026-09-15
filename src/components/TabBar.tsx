@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Shop, Settings } from './icons';
+import { Home, Friends, Shop, Settings } from './icons';
 
 const tabs = [
   { to: '/', label: '홈', Icon: Home },
+  { to: '/friends', label: '친구', Icon: Friends },
   { to: '/shop', label: '상점', Icon: Shop },
   { to: '/settings', label: '설정', Icon: Settings },
 ];

@@ -6,6 +6,9 @@ import { loadProgress, saveProgress, clearProgress } from './progress';
 import { sttSupported } from '../../speech/stt';
 import { stopSpeaking } from '../../speech/tts';
 import { inReview } from '../../lib/review';
+import { mostStudiedDeck } from '../../lib/friends';
+import { publishStudy } from '../../cloud/social';
+import { cloudConfigured } from '../../cloud/client';
 import { todayStr } from '../../lib/dateUtils';
 import ProgressBar from '../../components/ProgressBar';
 import ResultScreen from './ResultScreen';
@@ -21,6 +24,7 @@ export default function SessionPage() {
   const navigate = useNavigate();
   const isReview = searchParams.get('mode') === 'review';
 
+  const decks = useStore((s) => s.decks);
   const words = useStore((s) => s.words);
   const sentences = useStore((s) => s.sentences);
   const recordWord = useStore((s) => s.recordWord);
@@ -93,6 +97,11 @@ export default function SessionPage() {
     if (nextIndex >= exercises.length) {
       const result = await completeSession(nextCorrect, exercises.length);
       setGained(result.gained);
+      if (cloudConfigured()) {
+        const { streakCount, lastStudyDate } = useStore.getState().profile;
+        // 기다리지 않는다. 결과 화면은 인터넷과 상관없이 바로 떠야 한다.
+        void publishStudy({ streakCount, lastStudyDate, studying: mostStudiedDeck(exercises, words, sentences, decks) });
+      }
       clearProgress();
       setFinished(true);
     } else {
