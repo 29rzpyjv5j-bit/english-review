@@ -59,6 +59,17 @@ describe('useStore', () => {
     expect(useStore.getState().sentences[0].needsReview).toBe(true);
   });
 
+  it('맞힌 항목도 직접 복습 목록에 담을 수 있다', async () => {
+    await useStore.getState().createDeck('D', [{ english: 'agenda', meaning: '안건' }], []);
+    const id = useStore.getState().words[0].id;
+    await useStore.getState().recordWord(id, true);
+    expect(useStore.getState().words[0].needsReview).toBe(false);
+
+    await useStore.getState().addToReview([id]);
+    await useStore.getState().load();
+    expect(useStore.getState().words[0].needsReview).toBe(true);
+  });
+
   it('completeSession awards gems and updates streak', async () => {
     const { gained } = await useStore.getState().completeSession(5, 5);
     const p = useStore.getState().profile;

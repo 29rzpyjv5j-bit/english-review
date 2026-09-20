@@ -6,6 +6,7 @@ import { loadProgress, saveProgress, clearProgress } from './progress';
 import { sttSupported } from '../../speech/stt';
 import { stopSpeaking } from '../../speech/tts';
 import { inReview } from '../../lib/review';
+import { Flame, Check } from '../../components/icons';
 import { publishStudy } from '../../cloud/social';
 import { cloudConfigured } from '../../cloud/client';
 import { todayStr } from '../../lib/dateUtils';
@@ -25,6 +26,7 @@ export default function SessionPage() {
 
   const words = useStore((s) => s.words);
   const sentences = useStore((s) => s.sentences);
+  const addToReview = useStore((s) => s.addToReview);
   const recordWord = useStore((s) => s.recordWord);
   const recordSentence = useStore((s) => s.recordSentence);
   const completeSession = useStore((s) => s.completeSession);
@@ -113,6 +115,16 @@ export default function SessionPage() {
   }
 
   const ex = exercises[index];
+  // 맞힌 문제라도 더 보고 싶으면 여기서 복습 목록에 담는다. 짝 맞추기는 한 문제에
+  // 여러 단어가 섞여 있어 어느 것을 담을지 정할 수 없으므로 빼둔다.
+  const itemId =
+    ex.kind === 'mcq' || ex.kind === 'speakWord' ? ex.wordId
+    : ex.kind === 'matching' ? null
+    : ex.sentenceId;
+  const item = itemId
+    ? words.find((w) => w.id === itemId) ?? sentences.find((s) => s.id === itemId)
+    : undefined;
+  const alreadyInReview = item ? inReview(item) : false;
   // 진행바는 위에 고정하고, 카드는 남은 공간의 세로 중앙에 둔다(폰에서 누르기 쉬운 위치).
   return (
     <div className="max-w-md mx-auto p-4 min-h-[calc(100dvh-env(safe-area-inset-top)-2rem)] flex flex-col gap-6">
@@ -128,6 +140,18 @@ export default function SessionPage() {
           <WriteSentenceCard key={index} text={ex.text} translation={ex.translation} onDone={(c) => handleDone(ex, c)} />
         )}
       </div>
+      {itemId && (
+        <button
+          className={`mx-auto -mt-4 mb-2 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs active:opacity-90 ${
+            alreadyInReview ? 'border-accent/40 bg-accent/10 text-accent' : 'border-line bg-surface text-muted'
+          }`}
+          disabled={alreadyInReview}
+          onClick={() => addToReview([itemId])}
+        >
+          {alreadyInReview ? <Check className="w-3.5 h-3.5" /> : <Flame className="w-3.5 h-3.5" />}
+          {alreadyInReview ? '복습 목록에 있음' : '복습에 담기'}
+        </button>
+      )}
     </div>
   );
 }

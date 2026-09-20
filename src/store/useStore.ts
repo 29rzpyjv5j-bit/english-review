@@ -24,8 +24,12 @@ interface State {
   importIntoDeck: (name: string, words: ParsedWord[], sentences: ParsedSentence[]) => Promise<void>;
   recordWord: (id: string, correct: boolean) => Promise<void>;
   recordSentence: (id: string, correct: boolean) => Promise<void>;
+  /** 맞힌 항목이라도 더 보고 싶으면 복습 목록에 담는다. */
+  addToReview: (ids: string[]) => Promise<void>;
   /** 복습 목록에서 직접 뺀다. 사용자가 더 볼 필요 없다고 판단했을 때만 부른다. */
   removeFromReview: (ids: string[]) => Promise<void>;
+  /** 위 두 동작의 공통 구현. */
+  setReviewFlag: (ids: string[], needsReview: boolean) => Promise<void>;
   completeSession: (correct: number, total: number) => Promise<{ gained: number }>;
   buyFreeze: () => Promise<boolean>;
 }
@@ -113,10 +117,18 @@ export const useStore = create<State>((set, get) => ({
     set((s) => ({ sentences: s.sentences.map((x) => (x.id === id ? updated : x)) }));
   },
 
+  async addToReview(ids) {
+    await get().setReviewFlag(ids, true);
+  },
+
   async removeFromReview(ids) {
-    const drop = new Set(ids);
-    const words = get().words.filter((w) => drop.has(w.id)).map((w) => ({ ...w, needsReview: false, reviewStreak: 0 }));
-    const sentences = get().sentences.filter((s) => drop.has(s.id)).map((s) => ({ ...s, needsReview: false, reviewStreak: 0 }));
+    await get().setReviewFlag(ids, false);
+  },
+
+  async setReviewFlag(ids, needsReview) {
+    const target = new Set(ids);
+    const words = get().words.filter((w) => target.has(w.id)).map((w) => ({ ...w, needsReview, reviewStreak: 0 }));
+    const sentences = get().sentences.filter((s) => target.has(s.id)).map((s) => ({ ...s, needsReview, reviewStreak: 0 }));
     await Promise.all([...words.map(db.updateWord), ...sentences.map(db.updateSentence)]);
     set((s) => ({
       words: s.words.map((w) => words.find((x) => x.id === w.id) ?? w),

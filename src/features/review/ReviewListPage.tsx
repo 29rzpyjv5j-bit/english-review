@@ -105,7 +105,6 @@ export default function ReviewListPage() {
             ))}
           </ul>
 
-          <p className="text-xs text-muted">맞혀도 저절로 사라지지 않아요. 직접 뺄 때만 목록에서 빠집니다.</p>
         </>
       )}
     </div>
