@@ -5,7 +5,7 @@ const tabs = [
   { to: '/', label: '홈', Icon: Home },
   { to: '/friends', label: '스터디', Icon: Friends },
   { to: '/shop', label: '상점', Icon: Shop },
-  { to: '/settings', label: '설정', Icon: Settings },
+  { to: '/settings', label: '자료', Icon: Settings },
 ];
 
 export default function TabBar() {
