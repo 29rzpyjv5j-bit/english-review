@@ -119,7 +119,7 @@ export default function FriendsPage() {
 function Page({ children }: { children: React.ReactNode }) {
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-bold">친구</h1>
+      <h1 className="text-xl font-bold">스터디</h1>
       {children}
     </div>
   );

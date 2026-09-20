@@ -3,7 +3,7 @@ import { Home, Friends, Shop, Settings } from './icons';
 
 const tabs = [
   { to: '/', label: '홈', Icon: Home },
-  { to: '/friends', label: '친구', Icon: Friends },
+  { to: '/friends', label: '스터디', Icon: Friends },
   { to: '/shop', label: '상점', Icon: Shop },
   { to: '/settings', label: '설정', Icon: Settings },
 ];

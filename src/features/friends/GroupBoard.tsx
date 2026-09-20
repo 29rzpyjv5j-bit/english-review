@@ -5,7 +5,7 @@ import {
 } from '../../cloud/social';
 import { describeFriend, rankFriends, inviteExpired, inviteExpiryLabel } from '../../lib/friends';
 import { todayStr } from '../../lib/dateUtils';
-import { Flame, Settings } from '../../components/icons';
+import { Flame, Gear } from '../../components/icons';
 
 export default function GroupBoard({
   group, myId, onLeft,
@@ -87,7 +87,7 @@ export default function GroupBoard({
             className="relative grid place-items-center w-9 h-9 rounded-full border border-line text-muted active:opacity-90"
             onClick={() => { setSettingsOpen((v) => !v); setNotice(''); }}
           >
-            <Settings className="w-5 h-5" />
+            <Gear className="w-5 h-5" />
             {group.owned && waiting.length > 0 && (
               <span className="absolute -top-1 -right-1 grid place-items-center min-w-5 h-5 px-1 rounded-full bg-accent text-accentInk text-[11px] font-bold">
                 {waiting.length}
