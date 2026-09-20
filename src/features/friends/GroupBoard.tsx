@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { listGroupMembers, leaveGroup, type GroupInfo, type MemberStatus } from '../../cloud/social';
-import { describeFriend, rankFriends } from '../../lib/friends';
+import {
+  listGroupMembers, leaveGroup, approveMember, rejectMember, refreshInvite,
+  type GroupInfo, type MemberStatus,
+} from '../../cloud/social';
+import { describeFriend, rankFriends, inviteExpired, inviteExpiryLabel } from '../../lib/friends';
 import { todayStr } from '../../lib/dateUtils';
 import { Flame } from '../../components/icons';
 
 export default function GroupBoard({
   group, myId, onLeft,
 }: { group: GroupInfo; myId: string; onLeft: () => void }) {
+  const [invite, setInvite] = useState(group);
   const [members, setMembers] = useState<MemberStatus[] | null>(null);
   const [error, setError] = useState('');
-  const [shared, setShared] = useState('');
+  const [notice, setNotice] = useState('');
 
   const refresh = useCallback(async () => {
     setError('');
@@ -28,35 +32,42 @@ export default function GroupBoard({
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [refresh]);
 
+  const expired = inviteExpired(invite.inviteExpiresAt);
+
   async function share() {
-    const link = `${location.origin}${location.pathname}#/friends?code=${group.inviteCode}`;
-    const text = `영어 복습 같이 해요! "${group.name}" 초대 코드: ${group.inviteCode}`;
+    const link = `${location.origin}${location.pathname}#/friends?code=${invite.inviteCode}`;
+    const text = `영어 복습 같이 해요! "${invite.name}" 초대 코드: ${invite.inviteCode} (오늘까지)`;
     try {
       if (navigator.share) {
         await navigator.share({ title: '영어 복습', text, url: link });
         return;
       }
       await navigator.clipboard.writeText(`${text}\n${link}`);
-      setShared('초대 문구를 복사했어요');
+      setNotice('초대 문구를 복사했어요');
     } catch {
       // 공유 창을 닫은 경우
     }
   }
 
-  async function leave() {
-    if (!window.confirm(`"${group.name}" 그룹에서 나갈까요?`)) return;
+  async function act(task: () => Promise<unknown>) {
+    setError('');
     try {
-      await leaveGroup(group.id);
-      onLeft();
+      await task();
+      await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '나가지 못했어요.');
+      setError(err instanceof Error ? err.message : '처리하지 못했어요.');
     }
   }
 
+  async function leave() {
+    if (!window.confirm(`"${group.name}" 그룹에서 나갈까요?`)) return;
+    await act(async () => { await leaveGroup(group.id); onLeft(); });
+  }
+
   const today = todayStr();
-  const ranked = rankFriends(
-    (members ?? []).map((m) => ({ ...m, view: describeFriend(m.lastStudyDate, m.streakCount, today) })),
-  );
+  const all = (members ?? []).map((m) => ({ ...m, view: describeFriend(m.lastStudyDate, m.streakCount, today) }));
+  const waiting = all.filter((m) => m.pending);
+  const ranked = rankFriends(all.filter((m) => !m.pending));
   const doneCount = ranked.filter((m) => m.view.doneToday).length;
 
   return (
@@ -65,24 +76,64 @@ export default function GroupBoard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-lg font-bold truncate">{group.name}</p>
-            {members && (
-              <p className="text-sm text-muted">
-                {members.length}명 중 {doneCount}명 오늘 완료
-              </p>
-            )}
+            {members && <p className="text-sm text-muted">{ranked.length}명 중 {doneCount}명 오늘 완료</p>}
           </div>
           <button className="text-sm text-muted underline shrink-0" onClick={refresh}>새로고침</button>
         </div>
+
         <div className="flex items-center gap-2">
-          <span className="flex-1 rounded-xl border border-line bg-bg px-3 py-2.5 text-center font-mono text-lg tracking-[0.3em]">
-            {group.inviteCode}
+          <span
+            className={`flex-1 rounded-xl border border-line bg-bg px-3 py-2.5 text-center font-mono text-lg tracking-[0.3em] ${expired ? 'text-muted line-through' : ''}`}
+          >
+            {invite.inviteCode}
           </span>
-          <button className="rounded-xl bg-accent text-accentInk px-4 py-2.5 font-bold active:opacity-90" onClick={share}>
-            초대하기
-          </button>
+          {!expired && (
+            <button className="rounded-xl bg-accent text-accentInk px-4 py-2.5 font-bold active:opacity-90" onClick={share}>
+              초대하기
+            </button>
+          )}
         </div>
-        {shared && <p className="text-xs text-accent">{shared}</p>}
+        <p className="text-xs text-muted">
+          {expired ? '코드가 만료됐어요.' : `이 코드는 ${inviteExpiryLabel(invite.inviteExpiresAt)}까지만 쓸 수 있어요.`}
+          {group.owned && (
+            <button
+              className="ml-2 text-accent underline"
+              onClick={() => act(async () => setInvite(await refreshInvite(group.id)))}
+            >
+              새 코드 만들기
+            </button>
+          )}
+        </p>
+        {notice && <p className="text-xs text-accent">{notice}</p>}
       </div>
+
+      {waiting.length > 0 && (
+        <div className="rounded-2xl border border-accent/40 bg-accent/5 p-4 space-y-3">
+          <p className="font-bold text-accent">참여 요청 {waiting.length}명</p>
+          {!group.owned && <p className="text-xs text-muted">그룹을 만든 사람이 수락하면 합류돼요.</p>}
+          {waiting.map((m) => (
+            <div key={m.userId} className="flex items-center gap-2">
+              <span className="flex-1 truncate">{m.nickname}</span>
+              {group.owned && (
+                <>
+                  <button
+                    className="rounded-lg bg-accent text-accentInk px-3 py-1.5 text-sm font-bold active:opacity-90"
+                    onClick={() => act(() => approveMember(group.id, m.userId))}
+                  >
+                    수락
+                  </button>
+                  <button
+                    className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted active:opacity-90"
+                    onClick={() => act(() => rejectMember(group.id, m.userId))}
+                  >
+                    거절
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {error && <p className="text-sm text-danger">{error}</p>}
       {!members && !error && <p className="text-sm text-muted text-center py-6">불러오는 중…</p>}
@@ -104,8 +155,7 @@ export default function GroupBoard({
                   {me && <span className="ml-1 text-xs text-accent">나</span>}
                 </p>
                 <p className="text-xs text-muted truncate">
-                  {m.studying ? `${m.studying} 공부 중 · ` : ''}
-                  {m.view.lastStudied}
+                  {m.view.doneToday ? '학습 중 · 오늘' : m.view.lastStudied}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">

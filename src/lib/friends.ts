@@ -1,6 +1,4 @@
 import { daysBetween } from './dateUtils';
-import type { Exercise } from '../features/session/buildSession';
-import type { Deck, Word, Sentence } from '../types';
 
 export interface FriendView {
   streak: number;
@@ -29,31 +27,14 @@ export function rankFriends<T extends { nickname: string; view: FriendView }>(li
   );
 }
 
-// 한 세션에 여러 자료가 섞여 나오므로, 가장 많이 나온 자료를 "지금 공부 중"으로 친다.
-export function mostStudiedDeck(
-  exercises: Exercise[],
-  words: Word[],
-  sentences: Sentence[],
-  decks: Deck[],
-): string | null {
-  const deckOfWord = new Map(words.map((w) => [w.id, w.deckId]));
-  const deckOfSentence = new Map(sentences.map((s) => [s.id, s.deckId]));
-  const counts = new Map<string, number>();
-  const bump = (deckId: string | undefined) => {
-    if (deckId) counts.set(deckId, (counts.get(deckId) ?? 0) + 1);
-  };
-  for (const ex of exercises) {
-    if (ex.kind === 'matching') ex.pairs.forEach((p) => bump(deckOfWord.get(p.id)));
-    else if (ex.kind === 'mcq' || ex.kind === 'speakWord') bump(deckOfWord.get(ex.wordId));
-    else bump(deckOfSentence.get(ex.sentenceId));
-  }
-  let best: string | null = null;
-  let bestCount = 0;
-  for (const [deckId, n] of counts) {
-    if (n > bestCount) {
-      best = deckId;
-      bestCount = n;
-    }
-  }
-  return decks.find((d) => d.id === best)?.name ?? null;
+// 초대 코드는 하루만 쓴다. 코드를 맞혀 들어오려는 시도를 하루치로 묶어두기 위한 것이다.
+export function inviteExpired(expiresAt: string, now: Date = new Date()): boolean {
+  return new Date(expiresAt).getTime() <= now.getTime();
+}
+
+export function inviteExpiryLabel(expiresAt: string, now: Date = new Date()): string {
+  const at = new Date(expiresAt);
+  const sameDay = at.toDateString() === now.toDateString();
+  const time = at.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+  return sameDay ? `오늘 ${time}` : `내일 ${time}`;
 }

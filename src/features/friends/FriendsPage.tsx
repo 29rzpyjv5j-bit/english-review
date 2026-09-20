@@ -90,6 +90,14 @@ export default function FriendsPage() {
           onDone={(g) => { setAddingGroup(false); setActiveGroupId(g.id); refresh(); }}
           onCancel={state.groups.length > 0 ? () => setAddingGroup(false) : undefined}
         />
+      ) : active && active.myStatus === 'pending' ? (
+        <div className="rounded-2xl border border-line bg-surface p-4 space-y-2">
+          <p className="text-lg font-bold">"{active.name}" 수락 대기 중</p>
+          <p className="text-sm text-muted">
+            그룹을 만든 사람이 수락하면 친구들의 현황이 보여요. 그때까지는 아무것도 보이지 않습니다.
+          </p>
+          <button className="text-sm text-accent underline" onClick={refresh}>확인해보기</button>
+        </div>
       ) : (
         active && <GroupBoard key={active.id} group={active} myId={state.userId} onLeft={refresh} />
       )}
@@ -128,7 +136,7 @@ function NicknamePanel({ onSaved }: { onSaved: () => void }) {
     setBusy(true);
     setError('');
     try {
-      await saveNickname(trimmed, { streakCount: profile.streakCount, lastStudyDate: profile.lastStudyDate, studying: null });
+      await saveNickname(trimmed, { streakCount: profile.streakCount, lastStudyDate: profile.lastStudyDate });
       onSaved();
     } catch (err) {
       setError(err instanceof Error ? err.message : '저장하지 못했어요.');

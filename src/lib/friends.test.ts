@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { describeFriend, rankFriends, mostStudiedDeck } from './friends';
-import type { Word, Sentence } from '../types';
-
-const srs = { box: 1, dueDate: '2026-09-15', seen: 0, correct: 0, wrong: 0 };
+import { describeFriend, rankFriends, inviteExpired, inviteExpiryLabel } from './friends';
 
 describe('describeFriend', () => {
   it('오늘 공부했으면 연속 그대로, 오늘 완료', () => {
@@ -30,28 +27,16 @@ describe('rankFriends', () => {
   });
 });
 
-describe('mostStudiedDeck', () => {
-  const decks = [{ id: 'a', name: 'CLO 1', createdAt: 0 }, { id: 'b', name: 'CLO 8', createdAt: 0 }];
-  const words: Word[] = [
-    { id: 'w1', deckId: 'a', english: 'x', meaning: 'y', ...srs },
-    { id: 'w2', deckId: 'b', english: 'x', meaning: 'y', ...srs },
-    { id: 'w3', deckId: 'b', english: 'x', meaning: 'y', ...srs },
-  ];
-  const sentences: Sentence[] = [{ id: 's1', deckId: 'b', text: 'Hi.', ...srs }];
+describe('초대 코드 만료', () => {
+  const now = new Date('2026-09-20T10:00:00+09:00');
 
-  it('세션에서 가장 많이 나온 자료를 고른다', () => {
-    const name = mostStudiedDeck(
-      [
-        { kind: 'mcq', wordId: 'w1', prompt: '', answer: '', choices: [], direction: 'en2ko' },
-        { kind: 'matching', pairs: [{ id: 'w2', english: '', meaning: '' }, { id: 'w3', english: '', meaning: '' }] },
-        { kind: 'dictation', sentenceId: 's1', text: 'Hi.' },
-      ],
-      words, sentences, decks,
-    );
-    expect(name).toBe('CLO 8');
+  it('만료 시각이 지나면 쓸 수 없다', () => {
+    expect(inviteExpired('2026-09-20T09:59:00+09:00', now)).toBe(true);
+    expect(inviteExpired('2026-09-20T10:01:00+09:00', now)).toBe(false);
   });
 
-  it('알 수 없으면 null', () => {
-    expect(mostStudiedDeck([], words, sentences, decks)).toBeNull();
+  it('언제까지인지 알려준다', () => {
+    expect(inviteExpiryLabel('2026-09-20T18:30:00+09:00', now)).toContain('오늘');
+    expect(inviteExpiryLabel('2026-09-21T09:00:00+09:00', now)).toContain('내일');
   });
 });
