@@ -40,7 +40,10 @@ const toStatus = (r: StatusRow): MemberStatus => ({
 function friendly(error: { message: string }): Error {
   const m = error.message;
   if (m.includes('invite code not found')) return new Error('없는 초대 코드예요. 다시 확인해 주세요.');
-  if (/token.*(expired|invalid)|otp/i.test(m)) return new Error('코드가 맞지 않거나 만료됐어요. 새 코드를 받아 주세요.');
+  if (/invalid login credentials/i.test(m)) return new Error('이메일이나 비밀번호가 맞지 않아요.');
+  if (/already registered|already exists/i.test(m)) return new Error('이미 가입된 이메일이에요. 로그인해 주세요.');
+  if (/password.*at least (\d+)/i.test(m)) return new Error('비밀번호는 6자 이상으로 정해 주세요.');
+  if (/email.*invalid|invalid.*email/i.test(m)) return new Error('이메일 주소를 다시 확인해 주세요.');
   if (/rate limit|too many/i.test(m)) return new Error('요청이 너무 잦아요. 잠시 뒤에 다시 시도해 주세요.');
   if (/fetch|network/i.test(m)) return new Error('인터넷 연결을 확인해 주세요.');
   return new Error(m);
@@ -51,14 +54,16 @@ export async function currentUserId(): Promise<string | null> {
   return data.session?.user.id ?? null;
 }
 
-export async function sendLoginCode(email: string): Promise<void> {
-  const { error } = await getClient().auth.signInWithOtp({ email: email.trim(), options: { shouldCreateUser: true } });
+export async function signIn(email: string, password: string): Promise<void> {
+  const { error } = await getClient().auth.signInWithPassword({ email: email.trim(), password });
   if (error) throw friendly(error);
 }
 
-export async function verifyLoginCode(email: string, code: string): Promise<void> {
-  const { error } = await getClient().auth.verifyOtp({ email: email.trim(), token: code.trim(), type: 'email' });
+export async function signUp(email: string, password: string): Promise<void> {
+  const { data, error } = await getClient().auth.signUp({ email: email.trim(), password });
   if (error) throw friendly(error);
+  // 메일 확인이 켜져 있으면 가입은 되지만 로그인 상태가 되지 않는다. 그럴 땐 바로 알려준다.
+  if (!data.session) throw new Error('가입은 됐지만 바로 로그인되지 않았어요. 메일 확인 설정을 꺼야 합니다.');
 }
 
 export async function signOut(): Promise<void> {
