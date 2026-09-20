@@ -78,13 +78,13 @@ export default function SessionPage() {
     const nextCorrect = correctCount + (correct ? 1 : 0);
     let nextWrong = wrongItems;
     if (ex.kind === 'mcq' || ex.kind === 'speakWord') {
-      await recordWord(ex.wordId, correct, isReview);
+      await recordWord(ex.wordId, correct);
       if (!correct) {
         const text = ex.kind === 'mcq' ? ex.prompt : ex.english;
         nextWrong = [...wrongItems, { id: ex.wordId, text }];
       }
     } else if (ex.kind === 'repeatSentence' || ex.kind === 'dictation' || ex.kind === 'writeSentence') {
-      await recordSentence(ex.sentenceId, correct, isReview);
+      await recordSentence(ex.sentenceId, correct);
       if (!correct) nextWrong = [...wrongItems, { id: ex.sentenceId, text: ex.text }];
     }
     // matching 카드는 내부에서 개별 record 처리(아래 카드 구현)

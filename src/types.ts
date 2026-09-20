@@ -13,6 +13,8 @@ export interface Word {
   meaning: string;
   /** 틀린 항목 복습 목록에 있는지. 없으면 예전 기록으로 판단한다(lib/review). */
   needsReview?: boolean;
+  /** 목록에 들어온 뒤 연속으로 맞힌 횟수. 틀리면 0으로 돌아간다. */
+  reviewStreak?: number;
   box: number; // 1..5
   dueDate: string; // 'YYYY-MM-DD'
   seen: number;
@@ -28,6 +30,7 @@ export interface Sentence {
   /** 이 예문이 연습하는 표현. 예문과 함께 외울 수 있게 답을 낸 뒤 보여준다. */
   keyword?: string;
   needsReview?: boolean;
+  reviewStreak?: number;
   box: number;
   dueDate: string;
   seen: number;

@@ -29,7 +29,7 @@ describe('useStore', () => {
     expect(w.seen).toBe(1);
   });
 
-  it('틀린 항목은 앱을 다시 켜도 복습 목록에 남고, 복습에서 맞히면 빠진다', async () => {
+  it('틀린 항목은 앱을 다시 켜도 남고, 직접 뺄 때만 사라진다', async () => {
     await useStore.getState().createDeck('D', [{ english: 'agenda', meaning: '안건' }], [{ text: 'Hi.' }]);
     const wordId = useStore.getState().words[0].id;
     const sentId = useStore.getState().sentences[0].id;
@@ -42,14 +42,21 @@ describe('useStore', () => {
     expect(useStore.getState().words[0].needsReview).toBe(true);
     expect(useStore.getState().sentences[0].needsReview).toBe(true);
 
-    // 일반 학습에서 맞혀도 목록에 남는다.
-    await useStore.getState().recordWord(wordId, true, false);
+    // 맞혀도 목록에 남고, 연속 횟수만 올라간다.
+    await useStore.getState().recordWord(wordId, true);
+    await useStore.getState().recordWord(wordId, true);
     expect(useStore.getState().words[0].needsReview).toBe(true);
+    expect(useStore.getState().words[0].reviewStreak).toBe(2);
 
-    // 복습에서 맞히면 빠진다.
-    await useStore.getState().recordWord(wordId, true, true);
+    // 틀리면 연속 횟수는 0으로 돌아간다.
+    await useStore.getState().recordWord(wordId, false);
+    expect(useStore.getState().words[0].reviewStreak).toBe(0);
+
+    // 직접 뺄 때만 목록에서 사라진다.
+    await useStore.getState().removeFromReview([wordId]);
     await useStore.getState().load();
     expect(useStore.getState().words[0].needsReview).toBe(false);
+    expect(useStore.getState().sentences[0].needsReview).toBe(true);
   });
 
   it('completeSession awards gems and updates streak', async () => {

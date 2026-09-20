@@ -91,6 +91,13 @@ export default function HomePage() {
         <Chevron className="w-4 h-4 ml-auto" />
       </Link>
 
+      {hasWrongItems && (
+        <Link to="/review-list" className="flex items-center gap-2 px-4 -mt-3 text-sm text-muted active:opacity-90">
+          복습 목록 정리하기
+          <Chevron className="w-4 h-4 ml-auto" />
+        </Link>
+      )}
+
       <button
         onClick={() => setQuiet(!quiet)}
         role="switch"

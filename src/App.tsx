@@ -7,6 +7,7 @@ import SessionPage from './features/session/SessionPage';
 import ShopPage from './features/shop/ShopPage';
 import SettingsPage from './features/settings/SettingsPage';
 import FriendsPage from './features/friends/FriendsPage';
+import ReviewListPage from './features/review/ReviewListPage';
 import TabBar from './components/TabBar';
 
 export default function App() {
@@ -20,7 +21,7 @@ export default function App() {
   if (!loaded) return <div className="p-6 text-center text-muted">불러오는 중…</div>;
 
   // 세션(학습) 화면과 자료 추가 화면은 몰입/집중을 위해 탭바를 숨긴다.
-  const showTabBar = pathname === '/' || pathname === '/friends' || pathname === '/shop' || pathname === '/settings';
+  const showTabBar = pathname === '/' || pathname === '/review-list' || pathname === '/friends' || pathname === '/shop' || pathname === '/settings';
 
   // 노치/상태바를 피하도록 상단 세이프 에어리어 + 약간의 여백을 준다(홈 화면 설치 시 특히 중요).
   return (
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/add" element={<AddDeckPage />} />
         <Route path="/session" element={<SessionPage />} />
+        <Route path="/review-list" element={<ReviewListPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/settings" element={<SettingsPage />} />
