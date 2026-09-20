@@ -76,7 +76,7 @@ export default function HomePage() {
       </Link>
 
       <Link
-        to={hasWrongItems ? '/session?mode=review' : '#'}
+        to={hasWrongItems ? '/review-list' : '#'}
         className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm active:opacity-90 ${
           hasWrongItems
             ? 'border-line bg-surface text-muted'
@@ -90,13 +90,6 @@ export default function HomePage() {
         틀린 항목 복습하기 {hasWrongItems && `(${reviewCount})`}
         <Chevron className="w-4 h-4 ml-auto" />
       </Link>
-
-      {hasWrongItems && (
-        <Link to="/review-list" className="flex items-center gap-2 px-4 -mt-3 text-sm text-muted active:opacity-90">
-          복습 목록 정리하기
-          <Chevron className="w-4 h-4 ml-auto" />
-        </Link>
-      )}
 
       <button
         onClick={() => setQuiet(!quiet)}
