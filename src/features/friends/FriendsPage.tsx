@@ -75,7 +75,7 @@ export default function FriendsPage() {
           {state.groups.map((g) => (
             <button
               key={g.id}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-sm ${g.id === activeGroupId ? 'border-accent text-accent' : 'border-line text-muted'}`}
+              className={`shrink-0 rounded-full border px-3 py-2.5 text-sm ${g.id === activeGroupId ? 'border-accent text-accent' : 'border-line text-muted'}`}
               onClick={() => setActiveGroupId(g.id)}
             >
               {g.name}
@@ -96,7 +96,7 @@ export default function FriendsPage() {
           <p className="text-sm text-muted">
             그룹을 만든 사람이 수락하면 친구들의 현황이 보여요. 그때까지는 아무것도 보이지 않습니다.
           </p>
-          <button className="text-sm text-accent underline" onClick={refresh}>확인해보기</button>
+          <button className="text-sm text-accent underline py-3" onClick={refresh}>확인해보기</button>
         </div>
       ) : (
         active && <GroupBoard key={active.id} group={active} myId={state.userId} onLeft={refresh} />
@@ -110,7 +110,7 @@ export default function FriendsPage() {
 
       <div className="flex items-center justify-between pt-2 text-sm text-muted">
         <span>{state.me.nickname} 으로 참여 중</span>
-        <button className="underline" onClick={async () => { await signOut(); refresh(); }}>로그아웃</button>
+        <button className="underline px-2 py-3 -mr-2" onClick={async () => { await signOut(); refresh(); }}>로그아웃</button>
       </div>
     </Page>
   );
@@ -219,7 +219,7 @@ function GroupSetup({
       </div>
 
       {error && <p className="text-sm text-danger">{error}</p>}
-      {onCancel && <button className="w-full text-sm text-muted underline py-2" onClick={onCancel}>취소</button>}
+      {onCancel && <button className="w-full text-sm text-muted underline py-3" onClick={onCancel}>취소</button>}
     </div>
   );
 }

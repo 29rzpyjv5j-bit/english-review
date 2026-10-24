@@ -89,10 +89,10 @@ export default function SettingsPage() {
       <div className="space-y-2">
         <h3 className="text-xs font-bold uppercase tracking-wider text-muted">백업 · 기기 옮기기</h3>
         <div className="flex gap-2">
-          <button onClick={onExport} className="flex-1 rounded-xl border border-line bg-surface py-2.5 text-sm active:opacity-90">
+          <button onClick={onExport} className="flex-1 rounded-xl border border-line bg-surface py-3 text-sm active:opacity-90">
             내보내기
           </button>
-          <button onClick={() => fileRef.current?.click()} className="flex-1 rounded-xl border border-line bg-surface py-2.5 text-sm active:opacity-90">
+          <button onClick={() => fileRef.current?.click()} className="flex-1 rounded-xl border border-line bg-surface py-3 text-sm active:opacity-90">
             가져오기
           </button>
         </div>

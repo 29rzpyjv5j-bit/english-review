@@ -206,7 +206,7 @@ export default function AddDeckPage() {
       <h1 className="text-xl font-bold">자료 추가</h1>
 
       <div className="rounded-xl border border-accent/40 p-3 space-y-2 bg-accent/5">
-        <p className="text-sm font-medium text-accent">📥 CSV 파일 가져오기 (여러 자료 한 번에)</p>
+        <p className="text-sm font-medium text-accent">CSV 파일 가져오기 (여러 자료 한 번에)</p>
         <p className="text-xs text-muted">단어는 <span className="text-ink">deck, english, korean</span>, 문장은 <span className="text-ink">deck, text, translation</span> 형식이에요. 같은 이름의 자료가 이미 있으면 거기에 더해집니다.</p>
         <input
           type="file"
@@ -221,7 +221,7 @@ export default function AddDeckPage() {
       </div>
 
       <div className="rounded-xl border border-line p-3 space-y-2 bg-surface">
-        <p className="text-sm font-medium">📋 한 번에 붙여넣기</p>
+        <p className="text-sm font-medium">한 번에 붙여넣기</p>
         <p className="text-xs text-muted">단어·문장 구분 없이 통째로 붙여넣으세요. <span className="text-ink">=</span> 가 있는 줄은 단어칸, 나머지는 문장칸으로 자동 분류돼요.</p>
         <textarea
           aria-label="한 번에 붙여넣기"
@@ -240,7 +240,7 @@ export default function AddDeckPage() {
       </div>
 
       <div className="rounded-xl border border-accent/40 p-3 space-y-2 bg-accent/5">
-        <p className="text-sm font-medium text-accent">✨ AI로 정리 (Claude · 선택, API 키 필요)</p>
+        <p className="text-sm font-medium text-accent">AI로 정리 (Claude · 선택, API 키 필요)</p>
         <p className="text-xs text-muted">수업 자료 원문을 그대로 붙여넣으면 AI가 단어·문장으로 정리해 아래 칸을 채워줘요.</p>
 
         {apiKey && !editingKey ? (
@@ -259,7 +259,7 @@ export default function AddDeckPage() {
               placeholder="Claude API 키 (sk-ant-...)"
             />
             <button
-              className="rounded-lg bg-accent text-accentInk px-3 text-sm font-bold disabled:opacity-50"
+              className="rounded-lg bg-accent text-accentInk px-4 py-3 text-sm font-bold disabled:opacity-50"
               disabled={!keyDraft.trim()}
               onClick={saveKey}
             >

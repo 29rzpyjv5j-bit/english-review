@@ -63,7 +63,7 @@ export default function LoginPanel({ onSignedIn }: { onSignedIn: () => void }) {
       </button>
 
       <button
-        className="w-full text-sm text-muted underline"
+        className="w-full text-sm text-muted underline py-3"
         onClick={() => { setMode(signingUp ? 'signIn' : 'signUp'); setError(''); }}
       >
         {signingUp ? '이미 계정이 있어요' : '처음이에요 · 가입하기'}

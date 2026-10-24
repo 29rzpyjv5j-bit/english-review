@@ -81,10 +81,10 @@ export default function GroupBoard({
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <button className="text-sm text-muted underline" onClick={refresh}>새로고침</button>
+          <button className="text-sm text-muted underline px-2 py-3" onClick={refresh}>새로고침</button>
           <button
             aria-label="그룹 설정"
-            className="relative grid place-items-center w-9 h-9 rounded-full border border-line text-muted active:opacity-90"
+            className="relative grid place-items-center w-11 h-11 rounded-full border border-line text-muted active:opacity-90"
             onClick={() => { setSettingsOpen((v) => !v); setNotice(''); }}
           >
             <Gear className="w-5 h-5" />
@@ -138,13 +138,13 @@ export default function GroupBoard({
                     <div key={m.userId} className="flex items-center gap-2">
                       <span className="flex-1 truncate">{m.nickname}</span>
                       <button
-                        className="rounded-lg bg-accent text-accentInk px-3 py-1.5 text-sm font-bold active:opacity-90"
+                        className="rounded-lg bg-accent text-accentInk px-3 py-2.5 text-sm font-bold active:opacity-90"
                         onClick={() => act(() => approveMember(group.id, m.userId))}
                       >
                         수락
                       </button>
                       <button
-                        className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted active:opacity-90"
+                        className="rounded-lg border border-line px-3 py-2.5 text-sm text-muted active:opacity-90"
                         onClick={() => act(() => rejectMember(group.id, m.userId))}
                       >
                         거절
@@ -158,7 +158,7 @@ export default function GroupBoard({
             <p className="text-sm text-muted">초대는 그룹을 만든 사람만 할 수 있어요.</p>
           )}
 
-          <button className="w-full text-sm text-muted underline py-2" onClick={leave}>이 그룹에서 나가기</button>
+          <button className="w-full text-sm text-muted underline py-3" onClick={leave}>이 그룹에서 나가기</button>
           <button className="w-full rounded-xl border border-line py-2.5 text-sm" onClick={() => setSettingsOpen(false)}>
             닫기
           </button>

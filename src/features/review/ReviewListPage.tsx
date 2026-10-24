@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { inReview, isMastered, masteredLabel, MASTERED_AFTER } from '../../lib/review';
-import { Check, Flame } from '../../components/icons';
+import { Check, Close, Flame } from '../../components/icons';
 
 /** 한 세션에 나오는 문제 수(buildSession 의 기본값)와 맞춘다. */
 const SESSION_SIZE = 12;
@@ -45,7 +45,7 @@ export default function ReviewListPage() {
     <div className="max-w-md mx-auto p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold">오답노트</h1>
-        <button className="text-sm text-muted underline" onClick={() => navigate('/')}>홈으로</button>
+        <button className="text-sm text-muted underline px-2 py-3 -mr-2" onClick={() => navigate('/')}>홈으로</button>
       </div>
 
       {rows.length === 0 ? (
@@ -95,11 +95,11 @@ export default function ReviewListPage() {
                 </span>
                 <button
                   aria-label={`${r.title} 목록에서 빼기`}
-                  className="shrink-0 grid place-items-center w-8 h-8 text-muted active:opacity-60"
+                  className="shrink-0 grid place-items-center w-11 h-11 -mr-2 text-muted active:opacity-60"
                   disabled={busy}
                   onClick={() => remove([r.id])}
                 >
-                  ✕
+                  <Close className="w-5 h-5" />
                 </button>
               </li>
             ))}
