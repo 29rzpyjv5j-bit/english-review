@@ -78,7 +78,7 @@ export default function SettingsPage() {
           </ul>
 
           <a
-            href="/#/add"
+            href="#/add"
             className="block text-center rounded-xl border border-dashed border-line py-3 text-sm text-muted active:opacity-90"
           >
             + 자료 추가
